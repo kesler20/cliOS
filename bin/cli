@@ -1,0 +1,463 @@
+#!/usr/bin/env bash
+# cliOS - bash frontend. Reads config/cli.json and executes the resolved action.
+# The PowerShell frontend (cli.ps1) must stay behaviourally identical.
+
+set -uo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -L "${BASH_SOURCE[0]}" ]; then
+  TARGET="$(readlink "${BASH_SOURCE[0]}")"
+  case "$TARGET" in
+    /*) SCRIPT_DIR="$(cd "$(dirname "$TARGET")" && pwd)" ;;
+    *) SCRIPT_DIR="$(cd "$SCRIPT_DIR/$(dirname "$TARGET")" && pwd)" ;;
+  esac
+fi
+CONFIG="${CLIOS_CONFIG:-$SCRIPT_DIR/../config/cli.json}"
+
+DRY_RUN=0
+FRONTEND="bash"
+RAW_ARGS=("$@")
+
+# --------------------------------------------------------------------- log ---
+
+log_invocation() {
+  local status="$1" enabled path
+  [ "$DRY_RUN" -eq 1 ] && return 0
+  enabled="$(jq -r '.log // true' "$CONFIG" 2>/dev/null)"
+  [ "$enabled" = "false" ] && return 0
+  path="$(jq -r '.log_path // "${HOME}/.cliOS/history.txt"' "$CONFIG" 2>/dev/null)"
+  path="$(expand_roots "$path")" || return 0
+  mkdir -p "$(dirname "$path")" 2>/dev/null || return 0
+  printf '%s\t%s\t%s\t%s\tcli %s\n' \
+    "$(date +%Y-%m-%dT%H:%M:%S%z)" \
+    "${COMPUTERNAME:-$(hostname)}" \
+    "$FRONTEND" \
+    "$status" \
+    "${RAW_ARGS[*]}" >>"$path" 2>/dev/null || true
+}
+
+finish() {
+  local status="${1:-0}"
+  log_invocation "$status"
+  exit "$status"
+}
+
+die() {
+  echo "$*" >&2
+  finish 1
+}
+
+# ---------------------------------------------------------------- platform ---
+
+case "$(uname -s)" in
+  MINGW* | MSYS* | CYGWIN*) PLATFORM="windows" ;;
+  Darwin) PLATFORM="darwin" ;;
+  *) PLATFORM="linux" ;;
+esac
+
+# ------------------------------------------------------------------- roots ---
+
+# Always called in a command substitution, so `exit 1` ends the subshell and the
+# caller sees a non-zero status.
+expand_roots() {
+  local value="$1" token name resolved
+  while [[ "$value" =~ \$\{([A-Z_]+)\} ]]; do
+    token="${BASH_REMATCH[0]}"
+    name="${BASH_REMATCH[1]}"
+    if [ "$name" = "HOME" ]; then
+      resolved="$HOME"
+    else
+      resolved="$(jq -r --arg n "$name" --arg p "$PLATFORM" \
+        '.roots[$n] // {} | (.[$p] // .default // "")' "$CONFIG")"
+      if [ -z "$resolved" ]; then
+        echo "root $name is not configured on this machine ($PLATFORM)" >&2
+        exit 1
+      fi
+      resolved="${resolved//\$\{HOME\}/$HOME}"
+    fi
+    value="${value//$token/$resolved}"
+  done
+  echo "$value"
+}
+
+# ----------------------------------------------------------------- openers ---
+
+open_url() {
+  local url="$1"
+  case "$PLATFORM" in
+    windows) MSYS2_ARG_CONV_EXCL='*' cmd.exe //c start "" "$url" >/dev/null 2>&1 ;;
+    darwin) open "$url" ;;
+    *) xdg-open "$url" >/dev/null 2>&1 ;;
+  esac
+}
+
+open_path() {
+  local target="$1" win
+  [ -e "$target" ] || die "path does not exist: $target"
+  case "$PLATFORM" in
+    windows)
+      win="$(cygpath -w "$target")"
+      if [ -d "$target" ]; then
+        MSYS2_ARG_CONV_EXCL='*' explorer.exe "$win" >/dev/null 2>&1
+      else
+        MSYS2_ARG_CONV_EXCL='*' explorer.exe /select,"$win" >/dev/null 2>&1
+      fi
+      return 0
+      ;;
+    darwin) if [ -d "$target" ]; then open "$target"; else open -R "$target"; fi ;;
+    *) xdg-open "$(dirname "$target")" >/dev/null 2>&1 ;;
+  esac
+}
+
+# ----------------------------------------------------------------- listing ---
+
+list_table() {
+  local table="$1" verb="$2" key
+  echo "try one of the following:"
+  jq -r --arg t "$table" '.[$t] | keys[]' "$CONFIG" | while read -r key; do
+    echo "  cli $verb $key"
+  done
+}
+
+list_verbs() {
+  echo "cliOS - commands:"
+  jq -r '.commands | to_entries[] | "  cli \(.key) - \(.value.help // "")"' "$CONFIG"
+}
+
+# ----------------------------------------------------------------- capture ---
+
+heading_level() {
+  local text="$1" n=0
+  while [ "${text:$n:1}" = "#" ]; do n=$((n + 1)); done
+  echo "$n"
+}
+
+insert_line() {
+  # Insert $line into $file relative to the heading whose text starts with $after.
+  # Done in pure bash: msys awk reads in text mode and would strip CRLF endings.
+  local file="$1" after="$2" at="$3" line="$4"
+  local -a lines=()
+  local n i stripped eol="" level=0 this_level heading=-1 section_end=-1 target
+
+  mapfile -t lines <"$file"
+  n=${#lines[@]}
+
+  for ((i = 0; i < n; i++)); do
+    stripped="${lines[i]%$'\r'}"
+    [ "$stripped" != "${lines[i]}" ] && eol=$'\r'
+    if [ "$heading" -lt 0 ]; then
+      case "$stripped" in
+        "$after"*)
+          heading=$i
+          level="$(heading_level "$stripped")"
+          ;;
+      esac
+    elif [ "$section_end" -lt 0 ]; then
+      case "$stripped" in
+        '#'*)
+          this_level="$(heading_level "$stripped")"
+          [ "$this_level" -le "$level" ] && section_end=$i
+          ;;
+      esac
+    fi
+  done
+  [ "$heading" -lt 0 ] && return 1
+
+  if [ "$at" = "start" ]; then
+    target=$heading
+  else
+    if [ "$section_end" -ge 0 ]; then target=$((section_end - 1)); else target=$((n - 1)); fi
+    while [ "$target" -gt "$heading" ]; do
+      stripped="${lines[target]%$'\r'}"
+      [[ "$stripped" =~ ^[[:space:]]*$ ]] || break
+      target=$((target - 1))
+    done
+  fi
+
+  {
+    for ((i = 0; i < n; i++)); do
+      printf '%s\n' "${lines[i]}"
+      if [ "$i" -eq "$target" ]; then printf '%s\n' "$line$eol"; fi
+    done
+  } >"$file.clios.tmp" || {
+    rm -f "$file.clios.tmp"
+    return 1
+  }
+  mv "$file.clios.tmp" "$file"
+}
+
+do_capture() {
+  local id="$1"
+  shift
+  local text="$*" spec file after at task template line
+  [ -z "$text" ] && die "cli $id needs some text"
+
+  spec="$(jq -c --arg i "$id" '.captures[$i] // empty' "$CONFIG")"
+  [ -z "$spec" ] && die "unknown capture: $id"
+  file="$(echo "$spec" | jq -r '.file')"
+  after="$(echo "$spec" | jq -r '.after')"
+  at="$(echo "$spec" | jq -r '.at // "start"')"
+  task="$(echo "$spec" | jq -r '.task // false')"
+  template="$(echo "$spec" | jq -r '.template // ""')"
+
+  file="${file//\{date\}/$(date +%Y-%m-%d)}"
+  file="$(expand_roots "$file")" || finish 1
+
+  line="$(date +%H:%M) $text"
+  [ "$task" = "true" ] && line="- [ ] $line"
+
+  if [ "$DRY_RUN" -eq 1 ]; then
+    echo "capture $id"
+    echo "  file:   $file"
+    echo "  after:  $after ($at)"
+    echo "  line:   $line"
+    finish 0
+  fi
+
+  if [ ! -f "$file" ]; then
+    mkdir -p "$(dirname "$file")"
+    if [ -n "$template" ]; then
+      template="$(expand_roots "$template")" || finish 1
+      [ -f "$template" ] || die "template not found: $template"
+      cp "$template" "$file"
+    else
+      : >"$file"
+    fi
+  fi
+
+  insert_line "$file" "$after" "$at" "$line" ||
+    die "heading '$after' not found in $file"
+  echo "$line"
+  echo "  -> $file"
+}
+
+# ------------------------------------------------------------ config writes ---
+
+config_write() {
+  # Canonical form: keys sorted, two space indent. Must match cli.ps1 byte for byte.
+  jq -S --indent 2 "$@" "$CONFIG" >"$CONFIG.tmp" && mv "$CONFIG.tmp" "$CONFIG"
+}
+
+resolve_table() {
+  case "$1" in
+    link | links) echo "links" ;;
+    folder | folders) echo "folders" ;;
+    *)
+      echo "unknown table '$1', expected link or folder" >&2
+      exit 1
+      ;;
+  esac
+}
+
+do_config_set() {
+  local table="${1:-}" key="${2:-}" value="${3:-}"
+  { [ -z "$table" ] || [ -z "$key" ] || [ -z "$value" ]; } &&
+    die "usage: cli set link|folder <key> <value>"
+  table="$(resolve_table "$table")" || finish 1
+  if [ "$DRY_RUN" -eq 1 ]; then
+    echo "set $table.$key = $value"
+    finish 0
+  fi
+  config_write --arg t "$table" --arg k "$key" --arg v "$value" '.[$t][$k] = $v'
+  echo "set $table $key -> $value"
+}
+
+do_config_rm() {
+  local table="${1:-}" key="${2:-}" existing
+  { [ -z "$table" ] || [ -z "$key" ]; } && die "usage: cli rm link|folder <key>"
+  table="$(resolve_table "$table")" || finish 1
+  existing="$(jq -r --arg t "$table" --arg k "$key" '.[$t][$k] // empty' "$CONFIG")"
+  if [ -z "$existing" ]; then
+    echo "no such key '$key' in $table" >&2
+    list_table "$table" "${table%s}" >&2
+    finish 1
+  fi
+  if [ "$DRY_RUN" -eq 1 ]; then
+    echo "rm $table.$key"
+    finish 0
+  fi
+  config_write --arg t "$table" --arg k "$key" 'del(.[$t][$k])'
+  echo "removed $table $key"
+}
+
+# ----------------------------------------------------------------- actions ---
+
+do_lookup() {
+  local action="$1"
+  shift
+  local table as key value verb
+  table="$(echo "$action" | jq -r '.table')"
+  as="$(echo "$action" | jq -r '.as')"
+  verb="${table%s}"
+  key="${1:-}"
+
+  if [ -z "$key" ]; then
+    list_table "$table" "$verb"
+    finish 1
+  fi
+  value="$(jq -r --arg t "$table" --arg k "$key" '.[$t][$k] // empty' "$CONFIG")"
+  if [ -z "$value" ]; then
+    echo "no such $verb '$key'" >&2
+    list_table "$table" "$verb" >&2
+    finish 1
+  fi
+
+  if [ "$as" = "url" ]; then
+    if [ "$DRY_RUN" -eq 1 ]; then
+      echo "url $value"
+      finish 0
+    fi
+    open_url "$value"
+    echo "$value"
+  else
+    value="$(expand_roots "$value")" || finish 1
+    if [ "$DRY_RUN" -eq 1 ]; then
+      echo "path $value"
+      finish 0
+    fi
+    open_path "$value"
+    echo "$value"
+  fi
+}
+
+do_search() {
+  local action="$1"
+  shift
+  local table default vertical template query url
+  table="$(echo "$action" | jq -r '.table')"
+  default="$(echo "$action" | jq -r '.default')"
+
+  if [ $# -eq 0 ]; then
+    echo "usage: cli search [vertical] <query>" >&2
+    echo "verticals:" >&2
+    jq -r --arg t "$table" '.[$t] | keys[]' "$CONFIG" | sed 's/^/  /' >&2
+    finish 1
+  fi
+
+  vertical="$default"
+  if jq -e --arg t "$table" --arg k "$1" '.[$t] | has($k)' "$CONFIG" >/dev/null; then
+    vertical="$1"
+    shift
+  fi
+  [ $# -eq 0 ] && die "cli search $vertical needs a query"
+
+  template="$(jq -r --arg t "$table" --arg k "$vertical" '.[$t][$k]' "$CONFIG")"
+  query="$(jq -rn --arg s "$*" '$s|@uri')"
+  url="${template//\{query\}/$query}"
+  if [ "$DRY_RUN" -eq 1 ]; then
+    echo "url $url"
+    finish 0
+  fi
+  open_url "$url"
+  echo "$url"
+}
+
+do_code() {
+  local action="$1"
+  shift
+  local root clone project path reply
+  root="$(expand_roots "$(echo "$action" | jq -r '.root')")" || finish 1
+  clone="$(echo "$action" | jq -r '.clone')"
+  project="${1:-}"
+  [ -z "$project" ] && die "usage: cli code <project>"
+  path="$root/$project"
+
+  if [ "$DRY_RUN" -eq 1 ]; then
+    echo "code $path"
+    finish 0
+  fi
+  if [ ! -d "$path" ]; then
+    echo "$path does not exist"
+    read -r -p "clone ${clone//\{1\}/$project} ? [y/N] " reply
+    case "$reply" in
+      y | Y) ;;
+      *) finish 1 ;;
+    esac
+    (cd "$root" && git clone "${clone//\{1\}/$project}") || finish 1
+  fi
+  code "$path"
+  echo "$path"
+}
+
+do_exec() {
+  local action="$1"
+  shift
+  local cwd part arg i
+  local -a argv=()
+  cwd="$(expand_roots "$(echo "$action" | jq -r '.cwd')")" || finish 1
+  while IFS= read -r part; do
+    i=1
+    for arg in "$@"; do
+      part="${part//\{$i\}/$arg}"
+      i=$((i + 1))
+    done
+    argv+=("$part")
+  done < <(echo "$action" | jq -r '.argv[]')
+
+  [[ "${argv[*]}" == *"{1}"* ]] && die "usage: cli ${RAW_ARGS[0]} <name>"
+  if [ "$DRY_RUN" -eq 1 ]; then
+    echo "exec ${argv[*]} (cwd $cwd)"
+    finish 0
+  fi
+  (cd "$cwd" && "${argv[@]}")
+  finish $?
+}
+
+run_action() {
+  local action="$1"
+  shift
+  local type
+  type="$(echo "$action" | jq -r '.type')"
+  case "$type" in
+    lookup) do_lookup "$action" "$@" ;;
+    search) do_search "$action" "$@" ;;
+    code) do_code "$action" "$@" ;;
+    exec) do_exec "$action" "$@" ;;
+    capture) do_capture "$(echo "$action" | jq -r '.id')" "$@" ;;
+    config-set) do_config_set "$@" ;;
+    config-rm) do_config_rm "$@" ;;
+    *) die "unknown action type: $type" ;;
+  esac
+}
+
+# -------------------------------------------------------------------- main ---
+
+command -v jq >/dev/null 2>&1 ||
+  die "cliOS needs jq. Windows: it ships with anaconda, or 'scoop install jq'. Mac: 'brew install jq'."
+[ -f "$CONFIG" ] || die "config not found: $CONFIG"
+
+ARGS=()
+for arg in "$@"; do
+  case "$arg" in
+    --dry-run) DRY_RUN=1 ;;
+    -h) ARGS+=("--help") ;;
+    *) ARGS+=("$arg") ;;
+  esac
+done
+set -- "${ARGS[@]+"${ARGS[@]}"}"
+
+if [ $# -eq 0 ] || [ "$1" = "--help" ]; then
+  list_verbs
+  finish 0
+fi
+
+VERB="$1"
+shift
+NODE="$(jq -c --arg v "$VERB" '
+  .commands | to_entries
+  | map(select(.key == $v or ((.value.aliases // []) | index($v))))
+  | .[0].value // empty' "$CONFIG")"
+
+if [ -z "$NODE" ]; then
+  echo "no such command '$VERB'" >&2
+  list_verbs >&2
+  finish 1
+fi
+
+if [ "${1:-}" = "--help" ]; then
+  echo "cli $VERB - $(echo "$NODE" | jq -r '.help // ""')"
+  finish 0
+fi
+
+run_action "$(echo "$NODE" | jq -c '.action')" "$@"
+finish 0

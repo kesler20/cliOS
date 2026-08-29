@@ -1,0 +1,321 @@
+{
+  "captures": {
+    "agenda": {
+      "after": "## Questions and Themes",
+      "at": "start",
+      "file": "${VAULT}/2 Activities/Meetings/Meetings Agenda.md",
+      "help": "add a question to the meetings agenda",
+      "task": true
+    },
+    "bi": {
+      "after": "# Brain Inbox",
+      "at": "start",
+      "file": "${VAULT}/2 Activities/Daily Notes/{date}.md",
+      "help": "capture a thought into today's brain inbox",
+      "task": true,
+      "template": "${VAULT}/3 Resources/Templates/Daily Notes Template.md"
+    },
+    "sop": {
+      "after": "# SOPs",
+      "at": "start",
+      "file": "${VAULT}/2 Activities/Daily Notes/{date}.md",
+      "help": "capture an SOP idea into today's daily note",
+      "task": true,
+      "template": "${VAULT}/3 Resources/Templates/Daily Notes Template.md"
+    },
+    "study": {
+      "after": "# Learning Inbox",
+      "at": "end",
+      "file": "${VAULT}/2 Activities/Study OS/Inbox.md",
+      "help": "capture something you want to learn",
+      "task": true
+    }
+  },
+  "commands": {
+    "agenda": {
+      "action": {
+        "id": "agenda",
+        "type": "capture"
+      },
+      "help": "add a question to the meetings agenda"
+    },
+    "bi": {
+      "action": {
+        "id": "bi",
+        "type": "capture"
+      },
+      "help": "capture a thought into today's brain inbox"
+    },
+    "clone": {
+      "action": {
+        "argv": [
+          "git",
+          "clone",
+          "https://github.com/kesler20/{1}"
+        ],
+        "cwd": "${PROTOCOL}",
+        "type": "exec"
+      },
+      "help": "clone kesler20/<project> into ~/protocol"
+    },
+    "code": {
+      "action": {
+        "clone": "https://github.com/kesler20/{1}",
+        "root": "${PROTOCOL}",
+        "type": "code"
+      },
+      "help": "open ~/protocol/<project> in VS Code"
+    },
+    "folder": {
+      "action": {
+        "as": "path",
+        "table": "folders",
+        "type": "lookup"
+      },
+      "help": "open a stored folder in the file explorer"
+    },
+    "link": {
+      "action": {
+        "as": "url",
+        "table": "links",
+        "type": "lookup"
+      },
+      "aliases": [
+        "links"
+      ],
+      "help": "open a stored link in the browser"
+    },
+    "rm": {
+      "action": {
+        "tables": [
+          "links",
+          "folders"
+        ],
+        "type": "config-rm"
+      },
+      "help": "remove a key: cli rm link|folder <key>"
+    },
+    "search": {
+      "action": {
+        "default": "google",
+        "table": "searches",
+        "type": "search"
+      },
+      "help": "search a site: cli search [vertical] <query>"
+    },
+    "set": {
+      "action": {
+        "tables": [
+          "links",
+          "folders"
+        ],
+        "type": "config-set"
+      },
+      "help": "add a key: cli set link|folder <key> <value>"
+    },
+    "sop": {
+      "action": {
+        "id": "sop",
+        "type": "capture"
+      },
+      "help": "capture an SOP idea into today's daily note"
+    },
+    "study": {
+      "action": {
+        "id": "study",
+        "type": "capture"
+      },
+      "help": "capture something you want to learn"
+    }
+  },
+  "folders": {
+    "data-lake": "${ONEDRIVE}/3 Resources/Data Lake",
+    "documents": "${ONEDRIVE_HOME}/Documents",
+    "downloads": "${DOWNLOADS}",
+    "downloads-recent": "${ONEDRIVE}/3 Resources/Downloads",
+    "gallery": "${ONEDRIVE_HOME}/Documents/Screenshots/Pictures/Samsung Gallery/DCIM/Camera",
+    "obsidian": "${VAULT}",
+    "onedrive": "${ONEDRIVE}",
+    "onedrive-phd": "${PHD_ONEDRIVE}",
+    "papers": "${PHD_ONEDRIVE}/3 Resources/Papers",
+    "papers-personal": "${ONEDRIVE}/3 Resources/Papers",
+    "phd-assets": "${PHD_ONEDRIVE}/3 Resources/Assets",
+    "phd-presentations": "${PHD_ONEDRIVE}/3 Resources/Presentations",
+    "protocol": "${PROTOCOL}",
+    "protocol-sofia": "${PROTOCOL}/sofia",
+    "resources": "${ONEDRIVE}/3 Resources",
+    "screenshots": "${ONEDRIVE_HOME}/Documents/Screenshots/Pictures/Samsung Gallery/DCIM/Camera",
+    "squid": "${ONEDRIVE}/3 Resources/Squid Notes",
+    "textbooks": "${ONEDRIVE}/3 Resources/Textbooks"
+  },
+  "links": {
+    "admin-share-code": "https://www.gov.uk/prove-right-to-work/get-a-share-code-online",
+    "ai-chatgpt": "https://chatgpt.com/",
+    "ai-chatgpt-billing": "https://platform.openai.com/settings/organization/billing/overview",
+    "ai-chatgpt-usage": "https://platform.openai.com/settings/organization/usage",
+    "ai-claude": "https://claude.ai/new",
+    "ai-claude-usage": "https://claude.ai/settings/usage",
+    "ai-codex": "https://chatgpt.com/codex?openaicom_referred=true",
+    "ai-codex-envs": "https://chatgpt.com/codex/settings/environments",
+    "ai-copilot-bing": "https://www.bing.com/search?form=NTPCHB&q=Bing+AI&showconv=1",
+    "ai-copilot-usage": "https://github.com/settings/copilot/features",
+    "ai-perplexity": "https://www.perplexity.ai",
+    "ai-v0": "https://v0.app/",
+    "app-finances": "https://kesler20.github.io/sofia_finance/",
+    "app-portfolio": "https://personalportfolio-production-a17a.up.railway.app/",
+    "app-sequence-matching": "https://kesler20.github.io/sequence_matching",
+    "app-sofia-backend": "https://fly.io/apps/sofia-headless-backend/monitoring",
+    "app-sofia-planner": "https://kesler20.github.io/sofia_planner/",
+    "app-sofia-ui": "https://sofiaui-production.up.railway.app/",
+    "design-angry-tools": "https://angrytools.com/",
+    "design-biorender": "https://app.biorender.com/gallery/illustrations",
+    "design-blush-svg": "https://blush.design/collections",
+    "design-canva": "https://www.canva.com/",
+    "design-draw-uml": "https://www.draw-uml.co.uk",
+    "design-drawio": "https://app.diagrams.net/?src=about",
+    "design-drawsql": "https://drawsql.app/diagrams",
+    "design-eraser": "https://app.eraser.io/dashboard/all",
+    "design-excalidraw": "https://excalidraw.com/",
+    "design-flaticon": "https://www.flaticon.com/",
+    "design-font-awesome": "https://fontawesome.com/icons",
+    "design-lucidchart": "https://lucid.app/documents#/documents?folder_id=home",
+    "design-react-icons": "https://react-icons.github.io/react-icons",
+    "design-stately": "https://stately.ai/registry/projects",
+    "docs-mui": "https://mui.com/material-ui/react-select/",
+    "docs-tailwind": "https://tailwindcss.com/docs",
+    "docs-xstate": "https://lecepin.github.io/xstate-docs-cn/guides/start.html#our-first-machine",
+    "drive-modelling-reports": "https://drive.google.com/drive/u/3/folders/1oGLlCoI9epKJkSE2ZG7U-e_N2-AFOFPt",
+    "drive-research-data": "https://drive.google.com/drive/u/3/folders/1jvnUiNEBq2n5fJ8s82pw0FBzh2GbAWBn",
+    "drive-research-progress": "https://drive.google.com/drive/u/3/folders/1ZcoUOADuDc7iuspoBHQDxQg-4NHi6AEp",
+    "github": "https://github.com",
+    "github-new-repo": "https://github.com/new",
+    "github-projects": "https://github.com/kesler20?tab=projects",
+    "github-projects-phd": "https://github.com/users/kesler20/projects/5",
+    "github-projects-side": "https://github.com/users/kesler20/projects/7",
+    "github-repos": "https://github.com/kesler20?tab=repositories",
+    "github-templates": "https://github.com/kesler20?tab=repositories&q=&type=template&language=&sort=",
+    "github-tokens": "https://github.com/settings/tokens",
+    "google-bard": "https://bard.google.com/u/3/chat",
+    "google-calendar": "https://calendar.google.com/calendar/u/3",
+    "google-cloud-console": "https://console.cloud.google.com/projectselector2/apis/dashboard?supportedpurview=project",
+    "google-colab": "https://colab.research.google.com/",
+    "google-colab-notebook": "https://colab.research.google.com/drive/1GmiD6F5X250bg_Z4ErmnPsMwFddAfFGB#scrollTo=NAVaKsS1QgYB",
+    "google-docs": "https://docs.google.com/document/u/3",
+    "google-drive": "https://drive.google.com/drive/u/3/my-drive",
+    "google-keep": "https://keep.google.com/",
+    "google-mail": "https://mail.google.com/mail/u/2/?hl=en-GB#inbox",
+    "health-myfitnesspal": "https://www.myfitnesspal.com/",
+    "health-myprotein": "https://www.myprotein.com/account/my-account/subscriptions/8059837",
+    "home-electric": "https://account.ovoenergy.com/",
+    "home-ila": "https://ilivearound.securerc.co.uk/residentservices/kangaroo-works/home.aspx",
+    "home-references": "https://tenant.letalliance.co.uk/tenantreferencing/tenantjourney",
+    "home-rent": "https://ilivearound.securerc.co.uk/residentservices/kangaroo-works/payments.aspx#tab_MakePayments",
+    "home-water": "https://my.yorkshirewater.com/account/",
+    "home-wifi": "https://myaccount.ask4.com/",
+    "hs-client": "https://192.168.80.111",
+    "hs-server": "https://192.168.80.111:8075/apidocs/",
+    "infra-auth0": "https://manage.auth0.com/dashboard/uk/dev-gawi6gf4krlffayw/applications/buq0RMTXdW4SayyHZscrahoTboa9LvAb/settings",
+    "infra-aws": "https://us-east-1.console.aws.amazon.com/console/home?region=us-east-1",
+    "infra-dockerhub": "https://hub.docker.com/repositories/kesler20",
+    "infra-minio": "https://minioconsole.up.railway.app/",
+    "infra-minio-personal": "https://console-production-ca06.up.railway.app/",
+    "infra-mlflow": "https://mlflow-production-ed2d.up.railway.app/",
+    "infra-mlflow-personal": "https://mlflowdeployment-production.up.railway.app",
+    "infra-n8n": "https://primary-production-4ecf2.up.railway.app/home/workflows",
+    "infra-optuna": "https://optunadashboard-production.up.railway.app/dashboard",
+    "infra-postgres": "https://www.ovh.com/manager/#/public-cloud/pci/projects/c0c5e64224154ef9851ab449e0443753/instances/08f27d77-bc43-4fea-8089-e4288d42dab8",
+    "infra-prefect": "https://prefects-server.up.railway.app/dashboard",
+    "infra-prefect-local": "http://127.0.0.1:4200/dashboard",
+    "infra-railway": "https://railway.app/dashboard",
+    "infra-redis": "https://app.redislabs.com/#/subscriptions/subscription/1813436/bdb",
+    "learn-hackerrank": "https://www.hackerrank.com/dashboard",
+    "learn-ossu": "https://ossu.thinkific.com/courses/take/computer-science-v7",
+    "learn-skool": "https://www.skool.com/data-science-launchpad-8271/classroom",
+    "learn-typing": "https://10fastfingers.com/typing-test/english",
+    "media-discord": "https://discord.com/channels/795785288994652170/860155549165420594",
+    "media-netflix": "https://www.netflix.com/browse",
+    "media-tv-shows": "https://yarrlist.com/movies-and-tv-shows",
+    "pkm-brain-inbox-onedrive": "https://onedrive.live.com/?id=D6E96D5E52A0D29C%211384467&cid=D6E96D5E52A0D29C&sb=name&sd=1",
+    "pkm-scribe": "https://scribehow.com/workspace#dashboard",
+    "pkm-sop-publish": "https://publish.obsidian.md/standard-operating-protocols",
+    "pkm-tactiq": "https://app.tactiq.io/#/transcripts",
+    "pkm-ticktick": "https://www.ticktick.com/webapp",
+    "pkm-ticktick-summary": "https://ticktick.com/webapp/#q/all/summary",
+    "pkm-zapier": "https://zapier.com/app/zaps",
+    "research-connected-papers": "https://www.connectedpapers.com/",
+    "research-keywords": "https://publish.obsidian.md/standard-operating-protocols/2+Activities/Research+Papers/Keywords+table",
+    "research-libgen": "http://libgen.is",
+    "research-litmaps": "https://www.litmaps.com/",
+    "research-mendeley": "https://www.mendeley.com/reference-manager/library/all-references",
+    "research-overleaf": "https://www.overleaf.com/project",
+    "research-rabbit": "https://researchrabbitapp.com/home",
+    "research-sci-hub": "https://sci-hub.hkvisa.net",
+    "research-scispace": "https://typeset.io/",
+    "research-scopus": "https://www.scopus.com/search/form.uri?display=basic#basic",
+    "shop-amazon": "https://www.amazon.co.uk",
+    "shop-nectar": "https://www.nectar.com/account",
+    "tools-calendly": "https://calendly.com/event_types/user/me",
+    "tools-graph-calculator": "https://www.desmos.com/calculator",
+    "tools-merge-pdf": "https://www.ilovepdf.com/merge_pdf",
+    "tools-pdf-to-word": "https://acrobat.adobe.com/link/acrobat/pdf-to-word?x_api_client_id=adobe_com&x_api_client_location=pdf_to_word",
+    "travel-delay-repay": "https://www.buytickets.eastmidlandsrailway.co.uk/my-account/bookings",
+    "ucl-doctoral-programme": "https://www.ucl.ac.uk/human-resources/organisational-development/training-inductions-and-leadership/researcher-development/doctoral-0",
+    "ucl-founders": "https://founders-at-uclb.mn.co",
+    "ucl-homes-for-students": "https://kxweb.wearehomesforstudents.com/pages/Lander.aspx?wf=Hub",
+    "ucl-inkpath": "https://webapp.inkpath.co.uk/#/",
+    "ucl-portico": "https://www.ucl.ac.uk/portico",
+    "ucl-research-log": "https://researchlog.grad.ucl.ac.uk/index.php",
+    "ucl-sharepoint": "https://liveuclac-my.sharepoint.com/",
+    "work-clockify": "https://hexxcell.clockify.me/tracker",
+    "work-dashboard-interface": "https://docs.google.com/document/d/1Ps9xTePP41hG1C9j03SdCZC9VPiWcFC7/edit",
+    "work-gousto-ithrive": "https://gousto.csod.com/LMS/catalog/Welcome.aspx?tab_page_id=-67&tab_id=-1",
+    "work-loop": "https://loop.cloud.microsoft/",
+    "work-outlook": "https://outlook.office365.com/mail",
+    "work-outlook-calendar": "https://outlook.office.com/calendar/view/month",
+    "work-planner": "https://planner.cloud.microsoft/webui/mytasks/assignedtome/view/board?tid=1faf88fe-a998-4c5b-93c9-210a11d9a5c2",
+    "work-power-automate": "https://make.powerautomate.com/environments/Default-1faf88fe-a998-4c5b-93c9-210a11d9a5c2/home",
+    "work-wp4-meetings": "https://docs.google.com/document/d/1cwuMndj7w3-ejCjEjD01x_t8dcUbugf4QEbgx8865Ww/edit?tab=t.0",
+    "youtube": "https://www.youtube.com",
+    "youtube-chilled-playlist": "https://www.youtube.com/playlist?list=PL1vja3Iw3uUlaJdKtHWEnEji21l67iqf8",
+    "youtube-history": "https://www.youtube.com/feed/history",
+    "youtube-playlists": "https://www.youtube.com/feed/library",
+    "youtube-to-listen": "https://www.youtube.com/playlist?list=PL1vja3Iw3uUmoICieIt08qrb0k5CqTM4G",
+    "youtube-to-watch": "https://www.youtube.com/playlist?list=PL1vja3Iw3uUk3CDV3LRaqrKZ-G8bm3KuH",
+    "youtube-watch-later": "https://www.youtube.com/playlist?list=WL"
+  },
+  "log": true,
+  "log_path": "${HOME}/.cliOS/history.txt",
+  "roots": {
+    "DOWNLOADS": {
+      "default": "${HOME}/Downloads"
+    },
+    "HOME": {
+      "default": "${HOME}"
+    },
+    "ONEDRIVE": {
+      "windows": "${HOME}/OneDrive/00 PKM"
+    },
+    "ONEDRIVE_HOME": {
+      "windows": "${HOME}/OneDrive"
+    },
+    "PHD_ONEDRIVE": {
+      "windows": "${HOME}/OneDrive - University College London/00 PKM"
+    },
+    "PROTOCOL": {
+      "default": "${HOME}/protocol"
+    },
+    "VAULT": {
+      "default": "${HOME}/protocol/00 PKM"
+    }
+  },
+  "searches": {
+    "amazon": "https://www.amazon.co.uk/s?k={query}",
+    "gh": "https://github.com/search?q={query}&type=repositories",
+    "google": "https://www.google.com/search?q={query}",
+    "icons": "https://www.google.com/search?tbm=isch&q={query}+icon",
+    "images": "https://www.google.com/search?tbm=isch&q={query}",
+    "maps": "https://www.google.com/maps/search/{query}",
+    "scholar": "https://scholar.google.com/scholar?hl=en&as_sdt=0%2C5&q={query}",
+    "yt": "https://www.youtube.com/results?search_query={query}"
+  }
+}

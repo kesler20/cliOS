@@ -16,8 +16,11 @@ mapper: typing.Dict[str, typing.Any] = {
     # file and link commands.
     "folder": {"leaf node": actions.open_folder},
     "folders": {"leaf node": actions.open_folder},
+    "file": {"leaf node": actions.open_stored_file},
+    "files": {"leaf node": actions.open_stored_file},
     "link": {"leaf node": actions.open_link},
     "links": {"leaf node": actions.open_link},
+    "cleanup": {"leaf node": actions.cleanup},
     "rm": {"leaf node": actions.remove_key},
     "set": {"leaf node": actions.set_key},
 

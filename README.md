@@ -31,18 +31,24 @@ run clone modelOS                    clone it into ~/protocol
 run github wiz_iot_hub               open it on GitHub
 ```
 
-## Links and folders
+## Links, folders and files
 
 ```
 run link youtube watch later         open a stored link
 run folder papers                    open a stored folder in the file explorer
+run file links                       open a stored file in its default app
 run set link foo https://foo.com     add a key
 run rm link foo                      remove a key
+run cleanup                          re-sort the buffer files alphabetically
 ```
 
-Keys are composite, so `link` joins its words: `youtube watch later` and
-`youtube-watch-later` are the same thing. On a miss you get the keys sharing a
-word with what you typed.
+Keys are composite, so `link` and `file` join their words: `youtube watch later`
+and `youtube-watch-later` are the same thing. On a miss you get the keys sharing
+a word with what you typed.
+
+`file` values are paths relative to your home directory, resolved at run time so
+the same key works on both machines. It comes seeded with the three buffer files
+themselves, so `run file links` opens the link list for editing.
 
 ## Search
 

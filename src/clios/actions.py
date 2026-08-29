@@ -17,11 +17,13 @@ from clios import ERROR, HINT, print_error
 
 LINK = "🔗"
 FOLDER = "📂"
+FILE = "📄"
 SEARCH = "🔍"
 GITHUB = "🐙"
 CODE = "💻"
 ADDED = "✨"
 REMOVED = "🗑️"
+CLEANED = "🧹"
 
 BUFFER_FOLDER = pathlib.Path(__file__).parent / "buffer"
 HOME = pathlib.Path.home()
@@ -124,7 +126,9 @@ def resolve_table(name: str) -> str:
         return "links"
     if name in ("folder", "folders"):
         return "folders"
-    raise CliOSError(f"unknown table '{name}', expected link or folder")
+    if name in ("file", "files"):
+        return "files"
+    raise CliOSError(f"unknown table '{name}', expected link, folder or file")
 
 
 def list_keys(table: str, verb: str, near: str = "") -> None:
@@ -159,6 +163,20 @@ def open_url(url: str) -> None:
     import webbrowser
 
     webbrowser.open(url)
+
+
+def open_file(target: str) -> None:
+    """Open a file with whatever application owns it."""
+    path = pathlib.Path(target)
+    if not path.exists():
+        raise CliOSError(f"file does not exist: {target}")
+    platform = platform_name()
+    if platform == "windows":
+        os.startfile(path)  # type: ignore[attr-defined]
+    elif platform == "darwin":
+        subprocess.run(["open", str(path)])
+    else:
+        subprocess.run(["xdg-open", str(path)])
 
 
 def open_path(target: str) -> None:
@@ -265,6 +283,35 @@ def open_folder(key: str = "", *rest: str) -> None:
     print(f"{FOLDER} {path}")
 
 
+def open_stored_file(*parts: str) -> None:
+    """Open a stored file with its default application.
+
+    Values in `buffer/files.json` are paths relative to the home directory,
+    which is resolved at run time so the same key works on both machines.
+
+    Example
+    ```txt
+    run file powershell profile
+    run file powershell-profile
+    ```
+    """
+    key = compose_key(*parts)
+    if not key:
+        list_keys("files", "file")
+        raise CliOSError("")
+    files = read_buffer("files")
+    if key not in files:
+        print_error(f"{ERROR} no such file '{key}'")
+        list_keys("files", "file", near=key)
+        raise CliOSError("")
+    value = expand_roots(files[key])
+    path = pathlib.Path(value)
+    if not path.is_absolute():
+        path = HOME / value
+    open_file(str(path))
+    print(f"{FILE} {path.as_posix()}")
+
+
 def search(*query: str) -> None:
     """Search a site. The first word may be a vertical.
 
@@ -363,12 +410,48 @@ def set_key(table: str = "", key: str = "", *value: str) -> None:
     """
     words = [word for word in value if not word.startswith("--")]
     if not table or not key or not words:
-        raise CliOSError("usage: run set link|folder <key> <value>")
+        raise CliOSError("usage: run set link|folder|file <key> <value>")
     table = resolve_table(table)
     values = read_buffer(table)
     values[key] = words[0]
     write_buffer(table, values)
     print(f"{ADDED} set {table} {key} -> {words[0]}")
+
+
+def cleanup(*args: str) -> None:
+    """Rewrite every buffer file in canonical form, keys alphabetical.
+
+    `set` and `rm` already write this way, so this is for the files after they
+    have been edited by hand.
+
+    Example
+    ```txt
+    run cleanup
+    ```
+    """
+    for path in sorted(BUFFER_FOLDER.glob("*.json")):
+        before = path.read_bytes()
+        seen: typing.List[str] = []
+
+        def collect(pairs, seen=seen):
+            seen.extend(key for key, _ in pairs)
+            return dict(pairs)
+
+        try:
+            values = json.loads(before.decode("utf-8"), object_pairs_hook=collect)
+        except (UnicodeDecodeError, json.JSONDecodeError) as error:
+            raise CliOSError(f"{path.name} is not valid JSON: {error}") from error
+
+        # A duplicate key is legal JSON and the last one silently wins, so it
+        # would vanish here without a word.
+        duplicates = sorted({key for key in seen if seen.count(key) > 1})
+        for key in duplicates:
+            print_error(f"{ERROR} {path.stem}: '{key}' appeared more than once, kept the last")
+
+        write_buffer(path.stem, values)
+        was_tidy = path.read_bytes() == before
+        state = "already in order" if was_tidy else "reordered"
+        print(f"{CLEANED} {path.stem}: {len(values)} keys, {state}")
 
 
 def remove_key(table: str = "", key: str = "", *rest: str) -> None:
@@ -380,7 +463,7 @@ def remove_key(table: str = "", key: str = "", *rest: str) -> None:
     ```
     """
     if not table or not key:
-        raise CliOSError("usage: run rm link|folder <key>")
+        raise CliOSError("usage: run rm link|folder|file <key>")
     table = resolve_table(table)
     values = read_buffer(table)
     if key not in values:

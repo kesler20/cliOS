@@ -1,0 +1,5 @@
+{
+  "files": "protocol/cliOS/src/clios/buffer/files.json",
+  "folders": "protocol/cliOS/src/clios/buffer/folders.json",
+  "links": "protocol/cliOS/src/clios/buffer/links.json"
+}

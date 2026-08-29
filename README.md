@@ -4,7 +4,7 @@ One-shot commands for the things the sofia CLI was used for, typed at your norma
 prompt instead of inside a REPL. Same commands on Windows and macOS.
 
 ```
-run link pkm-ticktick              open a stored link
+run link youtube watch later       open a stored link
 run folder papers                  open a stored folder in the file explorer
 run search scholar mrna vaccine    search a site
 run bi remember to chase Egor      capture into today's brain inbox
@@ -45,6 +45,12 @@ Links and folders are one flat alphabetical namespace. There are no groups: the
 hierarchy lives in the key, like `google-calendar` and `youtube-watch-later`.
 Add one with `run set link <key> <url>`, which rewrites the buffer file with
 sorted keys and two space indent so the diff is the line you changed.
+
+`run link` joins its words into the key, so `run link youtube watch later` and
+`run link youtube-watch-later` are the same command and the two forms can be
+mixed. When the key does not exist, the suggestions are narrowed to the ones
+sharing a word with what you typed, so `run link ticktick` points at
+`pkm-ticktick` and `pkm-ticktick-summary` rather than listing all 133.
 
 Folder paths carry `${ROOT}` tokens resolved from the `ROOTS` table in
 `actions.py`, which is keyed by platform. A root with no entry for the current

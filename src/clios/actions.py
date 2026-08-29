@@ -122,9 +122,22 @@ def resolve_table(name: str) -> str:
     raise CliOSError(f"unknown table '{name}', expected link or folder")
 
 
-def list_keys(table: str, verb: str) -> None:
+def list_keys(table: str, verb: str, near: str = "") -> None:
+    """List a table's keys alphabetically, narrowed to a near miss if there is one.
+
+    Typing a key as words makes near misses likelier, and dumping 130 keys at
+    someone who mistyped one is not a listing anyone reads. When `near` is given,
+    only the keys sharing a word with it are shown, falling back to everything
+    when that matches nothing.
+    """
+    keys = sorted(read_buffer(table))
+    words = [word for word in near.split("-") if word]
+    if words:
+        candidates = [key for key in keys if any(word in key for word in words)]
+        if candidates:
+            keys = candidates
     print_error("try one of the following:")
-    for key in sorted(read_buffer(table)):
+    for key in keys:
         print_error(f"  run {verb} {key}")
 
 
@@ -194,21 +207,34 @@ def log_invocation(status: int) -> None:
 # ================= #
 
 
-def open_link(key: str = "", *rest: str) -> None:
+def compose_key(*parts: str) -> str:
+    """Join the words of a command into one composite key.
+
+    The keys are composite by design (`youtube-watch-history`), so the words can
+    be typed as words and joined here. A key typed with its dashes already in
+    place survives unchanged, and the two forms can be mixed.
+    """
+    words = [part for part in parts if not part.startswith("--")]
+    return "-".join(word.strip("-") for word in words if word.strip("-"))
+
+
+def open_link(*parts: str) -> None:
     """Open a stored link in the browser.
 
     Example
     ```txt
-    run link pkm-ticktick
+    run link youtube watch history
+    run link youtube-watch-history
     ```
     """
-    if not key or key.startswith("--"):
+    key = compose_key(*parts)
+    if not key:
         list_keys("links", "link")
         raise CliOSError("")
     links = read_buffer("links")
     if key not in links:
         print_error(f"no such link '{key}'")
-        list_keys("links", "link")
+        list_keys("links", "link", near=key)
         raise CliOSError("")
     url = links[key]
     if dry_run():
@@ -232,7 +258,7 @@ def open_folder(key: str = "", *rest: str) -> None:
     folders = read_buffer("folders")
     if key not in folders:
         print_error(f"no such folder '{key}'")
-        list_keys("folders", "folder")
+        list_keys("folders", "folder", near=key)
         raise CliOSError("")
     path = expand_roots(folders[key])
     if dry_run():
@@ -352,7 +378,7 @@ def remove_key(table: str = "", key: str = "", *rest: str) -> None:
     values = read_buffer(table)
     if key not in values:
         print_error(f"no such key '{key}' in {table}")
-        list_keys(table, table[:-1])
+        list_keys(table, table[:-1], near=key)
         raise CliOSError("")
     if dry_run():
         print(f"rm {table}.{key}")

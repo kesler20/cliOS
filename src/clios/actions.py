@@ -6,7 +6,15 @@ import subprocess
 import sys
 import typing
 
-from clios import print_error
+from clios import ERROR, HINT, print_error
+
+LINK = "🔗"
+FOLDER = "📂"
+SEARCH = "🔍"
+GITHUB = "🐙"
+CODE = "💻"
+ADDED = "✨"
+REMOVED = "🗑️"
 
 BUFFER_FOLDER = pathlib.Path(__file__).parent / "buffer"
 HOME = pathlib.Path.home()
@@ -126,7 +134,7 @@ def list_keys(table: str, verb: str, near: str = "") -> None:
         candidates = [key for key in keys if any(word in key for word in words)]
         if candidates:
             keys = candidates
-    print_error("try one of the following:")
+    print_error(f"{HINT} try one of the following:")
     for key in keys:
         print_error(f"  run {verb} {key}")
 
@@ -181,7 +189,7 @@ def log_invocation(status: int) -> None:
 
             machine = socket.gethostname()
         command = "run " + " ".join(sys.argv[1:])
-        line = "\t".join([stamp, machine, "python", str(status), command])
+        line = "\t".join([stamp, machine, str(status), command])
         with open(LOG_PATH, "a", encoding="utf-8", newline="") as log_file:
             log_file.write(line + "\n")
     except OSError:
@@ -221,12 +229,12 @@ def open_link(*parts: str) -> None:
         raise CliOSError("")
     links = read_buffer("links")
     if key not in links:
-        print_error(f"no such link '{key}'")
+        print_error(f"{ERROR} no such link '{key}'")
         list_keys("links", "link", near=key)
         raise CliOSError("")
     url = links[key]
     open_url(url)
-    print(url)
+    print(f"{LINK} {url}")
 
 
 def open_folder(key: str = "", *rest: str) -> None:
@@ -242,12 +250,12 @@ def open_folder(key: str = "", *rest: str) -> None:
         raise CliOSError("")
     folders = read_buffer("folders")
     if key not in folders:
-        print_error(f"no such folder '{key}'")
+        print_error(f"{ERROR} no such folder '{key}'")
         list_keys("folders", "folder", near=key)
         raise CliOSError("")
     path = expand_roots(folders[key])
     open_path(path)
-    print(path)
+    print(f"{FOLDER} {path}")
 
 
 def search(*query: str) -> None:
@@ -261,7 +269,7 @@ def search(*query: str) -> None:
     """
     words = [word for word in query if not word.startswith("--")]
     if not words:
-        print_error("usage: run search [vertical] <query>")
+        print_error(f"{HINT} usage: run search [vertical] <query>")
         print_error("verticals:")
         for vertical in sorted(SEARCHES):
             print_error(f"  {vertical}")
@@ -276,7 +284,7 @@ def search(*query: str) -> None:
 
     url = SEARCHES[vertical].replace("{query}", quote(" ".join(words), safe=""))
     open_url(url)
-    print(url)
+    print(f"{SEARCH} {url}")
 
 
 def open_in_code(project: str = "", *rest: str) -> None:
@@ -298,7 +306,7 @@ def open_in_code(project: str = "", *rest: str) -> None:
             return
         subprocess.run(["git", "clone", url], cwd=root, check=True)
     subprocess.run(["code", str(path)], shell=platform_name() == "windows")
-    print(path.as_posix())
+    print(f"{CODE} {path.as_posix()}")
 
 
 def github(*parts: str) -> None:
@@ -320,7 +328,7 @@ def github(*parts: str) -> None:
         owner_and_repo = repo if "/" in repo else f"{GITHUB_USER}/{repo}"
         url = f"https://github.com/{owner_and_repo}"
     open_url(url)
-    print(url)
+    print(f"{GITHUB} {url}")
 
 
 def clone(project: str = "", *rest: str) -> None:
@@ -353,7 +361,7 @@ def set_key(table: str = "", key: str = "", *value: str) -> None:
     values = read_buffer(table)
     values[key] = words[0]
     write_buffer(table, values)
-    print(f"set {table} {key} -> {words[0]}")
+    print(f"{ADDED} set {table} {key} -> {words[0]}")
 
 
 def remove_key(table: str = "", key: str = "", *rest: str) -> None:
@@ -369,9 +377,9 @@ def remove_key(table: str = "", key: str = "", *rest: str) -> None:
     table = resolve_table(table)
     values = read_buffer(table)
     if key not in values:
-        print_error(f"no such key '{key}' in {table}")
+        print_error(f"{ERROR} no such key '{key}' in {table}")
         list_keys(table, table[:-1], near=key)
         raise CliOSError("")
     del values[key]
     write_buffer(table, values)
-    print(f"removed {table} {key}")
+    print(f"{REMOVED} removed {table} {key}")

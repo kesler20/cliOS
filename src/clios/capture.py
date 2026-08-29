@@ -5,6 +5,9 @@ import typing
 
 from clios.actions import CliOSError, expand_roots
 
+CAPTURED = "✅"
+INTO = "↳"
+
 TARGETS: typing.Dict[str, typing.Dict[str, typing.Any]] = {
     "agenda": {
         "file": "${VAULT}/2 Activities/Meetings/Meetings Agenda.md",
@@ -110,8 +113,8 @@ def capture(target_id: str, *words: str) -> None:
             path.write_bytes(b"")
 
     insert_line(path, target["after"], target["at"], line)
-    print(line)
-    print(f"  -> {path.as_posix()}")
+    print(f"{CAPTURED} {line}")
+    print(f"  {INTO} {path.as_posix()}")
 
 
 def brain_inbox(*words: str) -> None:

@@ -1,4 +1,6 @@
-# cliOS
+# ⚙️ command line Operating Systems (cliOS)
+
+>`cliOS` is a command line interface for managing links, folders, projects, and searches.
 
 `run <command>`, typed at your normal prompt. Same on Windows and macOS.
 
@@ -54,4 +56,4 @@ run search scholar mrna vaccine      also yt, gh, images, icons, maps, amazon
 `run` lists the commands and `run <verb> --help` explains one. Adding a command
 is a function whose first docstring line is its help, plus a line in
 `src/clios/user_input_map.py`. Links and folders live in `src/clios/buffer/`,
-and every invocation is logged to `~/.cliOS/history.txt`.
+and every invocation is logged to `.cliOS/history.txt`.

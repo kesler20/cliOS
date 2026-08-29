@@ -2,6 +2,16 @@ import inspect
 import sys
 import typing
 
+# ==================== #
+#                      #
+#   UI ICONS           #
+#                      #
+# ==================== #
+
+LOGO = "⚙️"
+ERROR = "❌"
+HINT = "💡"
+
 
 def print_message(*args):
     if "--debug" in sys.argv or "--explain" in sys.argv or "--help" in sys.argv:
@@ -23,10 +33,10 @@ def execute_function(leaf_node: typing.Callable[..., typing.Any], *args) -> int:
         # Already a message meant for the user. An empty one means the command
         # has printed its own listing.
         if str(e):
-            print_error(str(e))
+            print_error(f"{ERROR} {e}")
         return 1
     except Exception as e:
-        print_error("Error:", e)
+        print_error(f"{ERROR} {e}")
         if isinstance(e, TypeError):
             signature = str(inspect.signature(leaf_node))
             print_error(f"Usage: {leaf_node.__name__}{signature}")
@@ -86,15 +96,15 @@ def handle_errors(
 ):
     traversed_path = clean_traversed_path(traversed_path)
     if error_message == "No such path found":
-        print_error(f"no such command '{path}'")
-        print_error("try one of the following:")
+        print_error(f"{ERROR} no such command '{path}'")
+        print_error(f"{HINT} try one of the following:")
         show_options(current_node, ("run " + traversed_path).strip())
 
     elif error_message == "Help flag found.":
         print_error(f"run {traversed_path}".replace("  ", " ").strip())
         has_sub_commands = any(key != "leaf node" for key in current_node)
         if has_sub_commands:
-            print_error("try one of the following:")
+            print_error(f"{HINT} try one of the following:")
         show_options(current_node, ("run " + traversed_path).strip())
 
     else:
@@ -146,7 +156,7 @@ def traverse_command_mapper(
         command_mapper = load_command_mapper()
 
     if not user_command:
-        print_error("run - commands:")
+        print_error(f"{LOGO} run - commands:")
         show_options(command_mapper, "run")
         return 0
 
@@ -205,6 +215,13 @@ def traverse_command_mapper(
 
 def main():
     from clios.actions import log_invocation
+
+    # Emoji would raise or mangle on the legacy console code page otherwise.
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, OSError):
+            pass
 
     status = traverse_command_mapper(sys.argv[1:])
     log_invocation(status)

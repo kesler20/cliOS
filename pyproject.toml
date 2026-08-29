@@ -10,7 +10,7 @@ requires-python = ">=3.14"
 dependencies = []
 
 [project.scripts]
-py-cli = "clios:main"
+run = "clios:main"
 
 [build-system]
 requires = ["uv_build>=0.9.17,<0.10.0"]

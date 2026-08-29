@@ -1,4 +1,4 @@
-"""The py-cli command tree.
+"""The run command tree.
 
 Each edge is a key and each leaf is a callable under "leaf node". Adding a
 command is adding a function and one line here. Search verticals are lambdas,

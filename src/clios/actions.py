@@ -1,4 +1,4 @@
-"""Everything a py-cli command does: roots, openers, lookups and config writes.
+"""Everything a run command does: roots, openers, lookups and config writes.
 
 Stdlib only. This is the half of cliOS that exists twice in the shell frontends,
 once as msys shims and once as PowerShell cmdlets, and once here.
@@ -18,7 +18,7 @@ BUFFER_FOLDER = pathlib.Path(__file__).parent / "buffer"
 HOME = pathlib.Path.home()
 LOG_PATH = HOME / ".cliOS" / "history.txt"
 
-# The shells keep this in config/cli.json. py-cli keeps it in code, so the
+# The shells keep this in config/cli.json. run keeps it in code, so the
 # buffer files hold nothing but keys and values.
 ROOTS: typing.Dict[str, typing.Dict[str, str]] = {
     "DOWNLOADS": {"default": "${HOME}/Downloads"},
@@ -125,7 +125,7 @@ def resolve_table(name: str) -> str:
 def list_keys(table: str, verb: str) -> None:
     print_error("try one of the following:")
     for key in sorted(read_buffer(table)):
-        print_error(f"  py-cli {verb} {key}")
+        print_error(f"  run {verb} {key}")
 
 
 # ================= #
@@ -179,7 +179,7 @@ def log_invocation(status: int) -> None:
             import socket
 
             machine = socket.gethostname()
-        command = "py-cli " + " ".join(sys.argv[1:])
+        command = "run " + " ".join(sys.argv[1:])
         line = "\t".join([stamp, machine, "python", str(status), command])
         with open(LOG_PATH, "a", encoding="utf-8", newline="") as log_file:
             log_file.write(line + "\n")
@@ -199,7 +199,7 @@ def open_link(key: str = "", *rest: str) -> None:
 
     Example
     ```txt
-    py-cli link pkm-ticktick
+    run link pkm-ticktick
     ```
     """
     if not key or key.startswith("--"):
@@ -223,7 +223,7 @@ def open_folder(key: str = "", *rest: str) -> None:
 
     Example
     ```txt
-    py-cli folder papers
+    run folder papers
     ```
     """
     if not key or key.startswith("--"):
@@ -247,13 +247,13 @@ def search(*query: str) -> None:
 
     Example
     ```txt
-    py-cli search scholar mrna vaccine
-    py-cli search how to exit vim
+    run search scholar mrna vaccine
+    run search how to exit vim
     ```
     """
     words = [word for word in query if not word.startswith("--")]
     if not words:
-        print_error("usage: py-cli search [vertical] <query>")
+        print_error("usage: run search [vertical] <query>")
         print_error("verticals:")
         for vertical in sorted(SEARCHES):
             print_error(f"  {vertical}")
@@ -263,7 +263,7 @@ def search(*query: str) -> None:
         vertical = words[0]
         words = words[1:]
     if not words:
-        raise CliOSError(f"py-cli search {vertical} needs a query")
+        raise CliOSError(f"run search {vertical} needs a query")
     from urllib.parse import quote
 
     url = SEARCHES[vertical].replace("{query}", quote(" ".join(words), safe=""))
@@ -279,11 +279,11 @@ def open_in_code(project: str = "", *rest: str) -> None:
 
     Example
     ```txt
-    py-cli code automation_engine
+    run code automation_engine
     ```
     """
     if not project or project.startswith("--"):
-        raise CliOSError("usage: py-cli code <project>")
+        raise CliOSError("usage: run code <project>")
     root = pathlib.Path(expand_roots("${PROTOCOL}"))
     path = root / project
     if dry_run():
@@ -304,11 +304,11 @@ def clone(project: str = "", *rest: str) -> None:
 
     Example
     ```txt
-    py-cli clone modelOS
+    run clone modelOS
     ```
     """
     if not project or project.startswith("--"):
-        raise CliOSError("usage: py-cli clone <project>")
+        raise CliOSError("usage: run clone <project>")
     root = pathlib.Path(expand_roots("${PROTOCOL}"))
     url = f"https://github.com/{GITHUB_USER}/{project}"
     if dry_run():
@@ -322,12 +322,12 @@ def set_key(table: str = "", key: str = "", *value: str) -> None:
 
     Example
     ```txt
-    py-cli set link infra-grafana https://grafana.example.com
+    run set link infra-grafana https://grafana.example.com
     ```
     """
     words = [word for word in value if not word.startswith("--")]
     if not table or not key or not words:
-        raise CliOSError("usage: py-cli set link|folder <key> <value>")
+        raise CliOSError("usage: run set link|folder <key> <value>")
     table = resolve_table(table)
     if dry_run():
         print(f"set {table}.{key} = {words[0]}")
@@ -343,11 +343,11 @@ def remove_key(table: str = "", key: str = "", *rest: str) -> None:
 
     Example
     ```txt
-    py-cli rm link infra-grafana
+    run rm link infra-grafana
     ```
     """
     if not table or not key:
-        raise CliOSError("usage: py-cli rm link|folder <key>")
+        raise CliOSError("usage: run rm link|folder <key>")
     table = resolve_table(table)
     values = read_buffer(table)
     if key not in values:

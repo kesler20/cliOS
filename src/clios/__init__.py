@@ -88,14 +88,14 @@ def handle_errors(
     if error_message == "No such path found":
         print_error(f"no such command '{path}'")
         print_error("try one of the following:")
-        show_options(current_node, ("py-cli " + traversed_path).strip())
+        show_options(current_node, ("run " + traversed_path).strip())
 
     elif error_message == "Help flag found.":
-        print_error(f"py-cli {traversed_path}".replace("  ", " ").strip())
+        print_error(f"run {traversed_path}".replace("  ", " ").strip())
         has_sub_commands = any(key != "leaf node" for key in current_node)
         if has_sub_commands:
             print_error("try one of the following:")
-        show_options(current_node, ("py-cli " + traversed_path).strip())
+        show_options(current_node, ("run " + traversed_path).strip())
 
     else:
         print_error(traversed_path.strip())
@@ -146,8 +146,8 @@ def traverse_command_mapper(
         command_mapper = load_command_mapper()
 
     if not user_command:
-        print_error("py-cli - commands:")
-        show_options(command_mapper, "py-cli")
+        print_error("run - commands:")
+        show_options(command_mapper, "run")
         return 0
 
     traversed_path = ""

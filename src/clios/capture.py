@@ -94,7 +94,7 @@ def insert_line(path: pathlib.Path, after: str, at: str, line: str) -> None:
 def capture(target_id: str, *words: str) -> None:
     text = " ".join(word for word in words if not word.startswith("--")).strip()
     if not text:
-        raise CliOSError(f"py-cli {target_id} needs some text")
+        raise CliOSError(f"run {target_id} needs some text")
 
     target = TARGETS[target_id]
     now = datetime.datetime.now()
@@ -133,7 +133,7 @@ def brain_inbox(*words: str) -> None:
 
     Example
     ```txt
-    py-cli bi remember to chase Egor
+    run bi remember to chase Egor
     ```
     """
     capture("bi", *words)
@@ -144,7 +144,7 @@ def sop(*words: str) -> None:
 
     Example
     ```txt
-    py-cli sop always check the token first
+    run sop always check the token first
     ```
     """
     capture("sop", *words)
@@ -155,7 +155,7 @@ def agenda(*words: str) -> None:
 
     Example
     ```txt
-    py-cli agenda ask Peyman about the deadline
+    run agenda ask Peyman about the deadline
     ```
     """
     capture("agenda", *words)
@@ -166,7 +166,7 @@ def study(*words: str) -> None:
 
     Example
     ```txt
-    py-cli study cholesky decomposition
+    run study cholesky decomposition
     ```
     """
     capture("study", *words)

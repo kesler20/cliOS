@@ -4,20 +4,20 @@ One-shot commands for the things the sofia CLI was used for, typed at your norma
 prompt instead of inside a REPL. Same commands on Windows and macOS.
 
 ```
-py-cli link pkm-ticktick              open a stored link
-py-cli folder papers                  open a stored folder in the file explorer
-py-cli search scholar mrna vaccine    search a site
-py-cli bi remember to chase Egor      capture into today's brain inbox
-py-cli sop always check the token     capture an SOP idea
-py-cli agenda ask Peyman about X      add a question to the meetings agenda
-py-cli study cholesky decomposition   capture something to learn
-py-cli code automation_engine         open ~/protocol/<project> in VS Code
-py-cli clone modelOS                  clone kesler20/<project> into ~/protocol
-py-cli set link foo https://foo.com   add a key
-py-cli rm link foo                    remove a key
+run link pkm-ticktick              open a stored link
+run folder papers                  open a stored folder in the file explorer
+run search scholar mrna vaccine    search a site
+run bi remember to chase Egor      capture into today's brain inbox
+run sop always check the token     capture an SOP idea
+run agenda ask Peyman about X      add a question to the meetings agenda
+run study cholesky decomposition   capture something to learn
+run code automation_engine         open ~/protocol/<project> in VS Code
+run clone modelOS                  clone kesler20/<project> into ~/protocol
+run set link foo https://foo.com   add a key
+run rm link foo                    remove a key
 ```
 
-`py-cli` on its own lists the commands with their one line help. A bare verb or
+`run` on its own lists the commands with their one line help. A bare verb or
 an unknown key lists that section's keys alphabetically. `--dry-run` prints the
 resolved action without doing anything. `--help` after a verb prints its help
 and signature, `--explain` its full docstring.
@@ -43,7 +43,7 @@ isolated from whatever Python is otherwise active. Stdlib only, no dependencies.
 
 Links and folders are one flat alphabetical namespace. There are no groups: the
 hierarchy lives in the key, like `google-calendar` and `youtube-watch-later`.
-Add one with `py-cli set link <key> <url>`, which rewrites the buffer file with
+Add one with `run set link <key> <url>`, which rewrites the buffer file with
 sorted keys and two space indent so the diff is the line you changed.
 
 Folder paths carry `${ROOT}` tokens resolved from the `ROOTS` table in
@@ -63,9 +63,9 @@ line to `user_input_map.py`:
 "weather": {"leaf node": actions.weather},
 ```
 
-The summary shows up in `py-cli` and in `py-cli weather --help`, and the
+The summary shows up in `run` and in `run weather --help`, and the
 signature is printed when the arguments are wrong. Nested paths work too: a dict
-of dicts gives `py-cli search scholar <query>`.
+of dicts gives `run search scholar <query>`.
 
 ## Captures
 

@@ -219,7 +219,7 @@ def main():
     # Emoji would raise or mangle on the legacy console code page otherwise.
     for stream in (sys.stdout, sys.stderr):
         try:
-            stream.reconfigure(encoding="utf-8", errors="replace")
+            stream.reconfigure(encoding="utf-8", errors="replace") # type: ignore
         except (AttributeError, OSError):
             pass
 

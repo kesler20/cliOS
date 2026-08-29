@@ -11,6 +11,7 @@ run bi remember to chase Egor      capture into today's brain inbox
 run sop always check the token     capture an SOP idea
 run agenda ask Peyman about X      add a question to the meetings agenda
 run study cholesky decomposition   capture something to learn
+run github automation_engine       open kesler20/<repo> on GitHub
 run code automation_engine         open ~/protocol/<project> in VS Code
 run clone modelOS                  clone kesler20/<project> into ~/protocol
 run set link foo https://foo.com   add a key

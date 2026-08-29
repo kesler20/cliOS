@@ -1,10 +1,3 @@
-"""Quick add into the vault, mirroring the Obsidian QuickAdd capture commands.
-
-The four targets come from `00 PKM/.obsidian/plugins/quickadd/data.json` field
-for field, so a line captured here is indistinguishable from one captured in
-Obsidian. Adding a fifth target is a dict entry and a mapper line.
-"""
-
 import datetime
 import pathlib
 import shutil

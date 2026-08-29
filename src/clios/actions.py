@@ -1,9 +1,3 @@
-"""Everything a run command does: roots, openers, lookups and config writes.
-
-Stdlib only. This is the half of cliOS that exists twice in the shell frontends,
-once as msys shims and once as PowerShell cmdlets, and once here.
-"""
-
 import datetime
 import json
 import os
@@ -323,6 +317,31 @@ def open_in_code(project: str = "", *rest: str) -> None:
         subprocess.run(["git", "clone", url], cwd=root, check=True)
     subprocess.run(["code", str(path)], shell=platform_name() == "windows")
     print(path.as_posix())
+
+
+def github(*parts: str) -> None:
+    """Open a GitHub repository, or your repository list with no name.
+
+    Example
+    ```txt
+    run github automation_engine
+    run github anthropics/claude-code
+    ```
+    """
+    words = [part for part in parts if not part.startswith("--")]
+    if not words:
+        url = f"https://github.com/{GITHUB_USER}?tab=repositories"
+    else:
+        # Taken verbatim rather than dash joined the way link keys are: repo
+        # names carry underscores, as in automation_engine and wiz_iot_hub.
+        repo = words[0]
+        owner_and_repo = repo if "/" in repo else f"{GITHUB_USER}/{repo}"
+        url = f"https://github.com/{owner_and_repo}"
+    if dry_run():
+        print(f"url {url}")
+        return
+    open_url(url)
+    print(url)
 
 
 def clone(project: str = "", *rest: str) -> None:

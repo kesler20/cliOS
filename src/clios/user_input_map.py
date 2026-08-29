@@ -1,12 +1,4 @@
-"""The run command tree.
-
-Each edge is a key and each leaf is a callable under "leaf node". Adding a
-command is adding a function and one line here. Search verticals are lambdas,
-the way sofia's mapper had them.
-"""
-
 import typing
-
 from clios import actions, capture
 
 mapper: typing.Dict[str, typing.Any] = {
@@ -15,6 +7,7 @@ mapper: typing.Dict[str, typing.Any] = {
     "clone": {"leaf node": actions.clone},
     "code": {"leaf node": actions.open_in_code},
     "folder": {"leaf node": actions.open_folder},
+    "github": {"leaf node": actions.github},
     "folders": {"leaf node": actions.open_folder},
     "link": {"leaf node": actions.open_link},
     "links": {"leaf node": actions.open_link},

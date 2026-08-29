@@ -16,7 +16,10 @@ FAILED=0
 CHECKED=0
 
 normalise() {
-  sed -e "s#^/c/#C:/#" \
+  # PowerShell terminates its lines with CRLF and bash with LF. That is each
+  # shell's native convention, not a behavioural difference, so it is stripped
+  # before comparing.
+  tr -d '\r' | sed -e "s#^/c/#C:/#" \
     -e "s#: /c/#: C:/#" \
     -e "s#\(url \|path \|code \)/c/#\1C:/#" \
     -e "s#(cwd /c/#(cwd C:/#" \

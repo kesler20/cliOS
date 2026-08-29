@@ -162,7 +162,7 @@ def traverse_command_mapper(
             str,
             typing.Dict[str, typing.Any],
             typing.Dict[str, typing.Callable[..., typing.Any]],
-        ] = command_mapper.get(path, "No such path found")
+        ] = command_mapper.get(path, "No such path found") # type: ignore
 
         # If the command is a string, it means that the path is not found.
         if isinstance(current_node, str):
@@ -206,10 +206,7 @@ def traverse_command_mapper(
 def main():
     from clios.actions import log_invocation
 
-    # --dry-run is read from sys.argv by the actions, so it is stripped here
-    # rather than travelling through the mapper as a command word.
-    arguments = [arg for arg in sys.argv[1:] if arg != "--dry-run"]
-    status = traverse_command_mapper(arguments)
+    status = traverse_command_mapper(sys.argv[1:])
     log_invocation(status)
     sys.exit(status)
 

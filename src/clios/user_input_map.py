@@ -2,16 +2,26 @@ import typing
 from clios import actions, capture
 
 mapper: typing.Dict[str, typing.Any] = {
+  # quick add capture commands. 
     "agenda": {"leaf node": capture.agenda},
     "bi": {"leaf node": capture.brain_inbox},
-    "clone": {"leaf node": actions.clone},
+    "sop": {"leaf node": capture.sop},
+    "study": {"leaf node": capture.study},
+
+    # special commands.
     "code": {"leaf node": actions.open_in_code},
-    "folder": {"leaf node": actions.open_folder},
+    "clone": {"leaf node": actions.clone},
     "github": {"leaf node": actions.github},
+
+    # file and link commands.
+    "folder": {"leaf node": actions.open_folder},
     "folders": {"leaf node": actions.open_folder},
     "link": {"leaf node": actions.open_link},
     "links": {"leaf node": actions.open_link},
     "rm": {"leaf node": actions.remove_key},
+    "set": {"leaf node": actions.set_key},
+
+    # search commands.
     "search": {
         "leaf node": actions.search,
         "amazon": {"leaf node": lambda *q: actions.search("amazon", *q)},
@@ -22,7 +32,4 @@ mapper: typing.Dict[str, typing.Any] = {
         "scholar": {"leaf node": lambda *q: actions.search("scholar", *q)},
         "yt": {"leaf node": lambda *q: actions.search("yt", *q)},
     },
-    "set": {"leaf node": actions.set_key},
-    "sop": {"leaf node": capture.sop},
-    "study": {"leaf node": capture.study},
 }

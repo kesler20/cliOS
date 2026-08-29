@@ -3,7 +3,7 @@ import pathlib
 import shutil
 import typing
 
-from clios.actions import CliOSError, dry_run, expand_roots
+from clios.actions import CliOSError, expand_roots
 
 TARGETS: typing.Dict[str, typing.Dict[str, typing.Any]] = {
     "agenda": {
@@ -97,13 +97,6 @@ def capture(target_id: str, *words: str) -> None:
     line = f"{now.strftime('%H:%M')} {text}"
     if target.get("task"):
         line = f"- [ ] {line}"
-
-    if dry_run():
-        print(f"capture {target_id}")
-        print(f"  file:   {path.as_posix()}")
-        print(f"  after:  {target['after']} ({target['at']})")
-        print(f"  line:   {line}")
-        return
 
     if not path.exists():
         path.parent.mkdir(parents=True, exist_ok=True)

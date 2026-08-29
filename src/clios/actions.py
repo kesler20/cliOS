@@ -57,10 +57,6 @@ def platform_name() -> str:
     return "linux"
 
 
-def dry_run() -> bool:
-    return "--dry-run" in sys.argv
-
-
 def expand_roots(value: str) -> str:
     """Replace every ${ROOT} token with its path for this platform.
 
@@ -175,8 +171,6 @@ def open_path(target: str) -> None:
 
 def log_invocation(status: int) -> None:
     """Append to the log the shell frontends share, so all three rank together."""
-    if dry_run():
-        return
     try:
         LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
         stamp = datetime.datetime.now().astimezone().strftime("%Y-%m-%dT%H:%M:%S%z")
@@ -231,9 +225,6 @@ def open_link(*parts: str) -> None:
         list_keys("links", "link", near=key)
         raise CliOSError("")
     url = links[key]
-    if dry_run():
-        print(f"url {url}")
-        return
     open_url(url)
     print(url)
 
@@ -255,9 +246,6 @@ def open_folder(key: str = "", *rest: str) -> None:
         list_keys("folders", "folder", near=key)
         raise CliOSError("")
     path = expand_roots(folders[key])
-    if dry_run():
-        print(f"path {path}")
-        return
     open_path(path)
     print(path)
 
@@ -287,9 +275,6 @@ def search(*query: str) -> None:
     from urllib.parse import quote
 
     url = SEARCHES[vertical].replace("{query}", quote(" ".join(words), safe=""))
-    if dry_run():
-        print(f"url {url}")
-        return
     open_url(url)
     print(url)
 
@@ -306,9 +291,6 @@ def open_in_code(project: str = "", *rest: str) -> None:
         raise CliOSError("usage: run code <project>")
     root = pathlib.Path(expand_roots("${PROTOCOL}"))
     path = root / project
-    if dry_run():
-        print(f"code {path.as_posix()}")
-        return
     if not path.is_dir():
         url = f"https://github.com/{GITHUB_USER}/{project}"
         print(f"{path.as_posix()} does not exist")
@@ -337,9 +319,6 @@ def github(*parts: str) -> None:
         repo = words[0]
         owner_and_repo = repo if "/" in repo else f"{GITHUB_USER}/{repo}"
         url = f"https://github.com/{owner_and_repo}"
-    if dry_run():
-        print(f"url {url}")
-        return
     open_url(url)
     print(url)
 
@@ -356,9 +335,6 @@ def clone(project: str = "", *rest: str) -> None:
         raise CliOSError("usage: run clone <project>")
     root = pathlib.Path(expand_roots("${PROTOCOL}"))
     url = f"https://github.com/{GITHUB_USER}/{project}"
-    if dry_run():
-        print(f"exec git clone {url} (cwd {root.as_posix()})")
-        return
     subprocess.run(["git", "clone", url], cwd=root, check=True)
 
 
@@ -374,9 +350,6 @@ def set_key(table: str = "", key: str = "", *value: str) -> None:
     if not table or not key or not words:
         raise CliOSError("usage: run set link|folder <key> <value>")
     table = resolve_table(table)
-    if dry_run():
-        print(f"set {table}.{key} = {words[0]}")
-        return
     values = read_buffer(table)
     values[key] = words[0]
     write_buffer(table, values)
@@ -399,9 +372,6 @@ def remove_key(table: str = "", key: str = "", *rest: str) -> None:
         print_error(f"no such key '{key}' in {table}")
         list_keys(table, table[:-1], near=key)
         raise CliOSError("")
-    if dry_run():
-        print(f"rm {table}.{key}")
-        return
     del values[key]
     write_buffer(table, values)
     print(f"removed {table} {key}")

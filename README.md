@@ -19,9 +19,8 @@ run rm link foo                    remove a key
 ```
 
 `run` on its own lists the commands with their one line help. A bare verb or
-an unknown key lists that section's keys alphabetically. `--dry-run` prints the
-resolved action without doing anything. `--help` after a verb prints its help
-and signature, `--explain` its full docstring.
+an unknown key lists that section's keys alphabetically. `--help` after a verb
+prints its help and signature, `--explain` its full docstring.
 
 ## Install
 
@@ -98,8 +97,7 @@ inbox are LF.
 
 Every real invocation appends a tab separated line to `~/.cliOS/history.txt`:
 timestamp, machine, frontend, exit status, the command as typed. Failures are
-logged too, since a mistyped key is the signal for what to add next. `--dry-run`
-is not logged.
+logged too, since a mistyped key is the signal for what to add next.
 
 ```bash
 cut -f5 ~/.cliOS/history.txt | sort | uniq -c | sort -rn | head -20

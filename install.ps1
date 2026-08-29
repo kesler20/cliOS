@@ -6,8 +6,11 @@ $repo = Split-Path -Parent $PSCommandPath
 $entry = Join-Path $repo 'bin/cli.ps1'
 $marker = '# cliOS'
 
+# `cli` is a built-in alias for Clear-Item, and aliases take precedence over
+# functions, so it has to go before the function can be seen.
 $block = @"
 $marker
+if (Get-Alias cli -ErrorAction SilentlyContinue) { Remove-Alias cli -Force }
 function cli { & "$entry" @args }
 "@
 

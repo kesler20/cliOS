@@ -25,7 +25,8 @@ function Write-UsageLog([int]$Status) {
         $stamp = $now.ToString('yyyy-MM-ddTHH:mm:ss') + $now.ToString('zzz').Replace(':', '')
         $machine = if ($env:COMPUTERNAME) { $env:COMPUTERNAME } else { [System.Net.Dns]::GetHostName() }
         $line = @($stamp, $machine, $script:Frontend, $Status, "cli $($script:RawArgs -join ' ')") -join "`t"
-        Add-Content -LiteralPath $path -Value $line -Encoding utf8NoBOM
+        # Explicit LF: Add-Content would write CRLF here and the bash frontend LF.
+        [System.IO.File]::AppendAllText($path, "$line`n", (New-Object System.Text.UTF8Encoding($false)))
     } catch {}
 }
 

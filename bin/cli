@@ -23,6 +23,7 @@ RAW_ARGS=("$@")
 log_invocation() {
   local status="$1" enabled path
   [ "$DRY_RUN" -eq 1 ] && return 0
+  [ -f "$CONFIG" ] || return 0
   enabled="$(jq -r '.log // true' "$CONFIG" 2>/dev/null)"
   [ "$enabled" = "false" ] && return 0
   path="$(jq -r '.log_path // "${HOME}/.cliOS/history.txt"' "$CONFIG" 2>/dev/null)"
@@ -234,8 +235,10 @@ do_capture() {
 # ------------------------------------------------------------ config writes ---
 
 config_write() {
-  # Canonical form: keys sorted, two space indent. Must match cli.ps1 byte for byte.
-  jq -S --indent 2 "$@" "$CONFIG" >"$CONFIG.tmp" && mv "$CONFIG.tmp" "$CONFIG"
+  # Canonical form: keys sorted, two space indent, LF. Must match cli.ps1 byte for
+  # byte. jq on Windows writes stdout in text mode, hence the tr: a real carriage
+  # return inside a JSON string is escaped by jq, so no raw CR can survive there.
+  jq -S --indent 2 "$@" "$CONFIG" | tr -d '\r' >"$CONFIG.tmp" && mv "$CONFIG.tmp" "$CONFIG"
 }
 
 resolve_table() {

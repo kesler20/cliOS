@@ -8,8 +8,15 @@ TARGET="$HOME/.local/bin"
 
 mkdir -p "$TARGET"
 chmod +x "$REPO/bin/cli"
-ln -sf "$REPO/bin/cli" "$TARGET/cli"
-echo "linked $TARGET/cli -> $REPO/bin/cli"
+
+# A wrapper rather than a symlink: MSYS `ln -s` copies the file on Windows, which
+# would freeze the script at install time and break the relative config lookup.
+cat >"$TARGET/cli" <<WRAPPER
+#!/usr/bin/env bash
+exec "$REPO/bin/cli" "\$@"
+WRAPPER
+chmod +x "$TARGET/cli"
+echo "installed $TARGET/cli -> $REPO/bin/cli"
 
 case ":$PATH:" in
   *":$TARGET:"*) ;;

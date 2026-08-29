@@ -10,7 +10,7 @@ from clios import print_error
 
 BUFFER_FOLDER = pathlib.Path(__file__).parent / "buffer"
 HOME = pathlib.Path.home()
-LOG_PATH = HOME / ".cliOS" / "history.txt"
+LOG_PATH = HOME / "protocol" / "cliOS" / ".cliOS" / "history.txt"
 
 # The shells keep this in config/cli.json. run keeps it in code, so the
 # buffer files hold nothing but keys and values.

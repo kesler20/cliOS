@@ -1,2 +1,5 @@
 *.tmp
 *.clios.tmp
+__pycache__/
+*.pyc
+.venv/

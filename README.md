@@ -107,3 +107,58 @@ move it.
 ```bash
 cut -f5 ~/.cliOS/history.txt | sort | uniq -c | sort -rn | head -20
 ```
+
+## py-cli, the Python implementation
+
+A second implementation of the same command surface, running as a trial. If it
+wins, the PowerShell frontend goes. Until then all three coexist and `cli` keeps
+meaning the shell implementation.
+
+```bash
+uv tool install --editable .
+py-cli link pkm-ticktick
+```
+
+Measured here on Windows, five runs of the same lookup:
+
+| implementation | per invocation |
+| --- | --- |
+| py-cli | 523ms |
+| bin/cli.ps1 | 1122ms |
+| bin/cli | 1353ms |
+
+### It is separate, not a third frontend
+
+py-cli does not read `config/cli.json`. It has its own `src/clios/buffer/links.json`
+and `folders.json`, flat key to value and nothing else. Search verticals, the
+four capture targets and the roots table live in Python code instead.
+
+The consequence to know about: `cli set link foo` and `py-cli set link foo`
+write different files, so the two link sets drift from here on. That is the
+price of keeping this side simple, and the trial ends with one winner.
+
+### Layout
+
+| file | holds |
+| --- | --- |
+| `src/clios/__init__.py` | command traversal, error listings, `main` |
+| `src/clios/user_input_map.py` | the command tree |
+| `src/clios/actions.py` | roots, openers, lookups, search, git, config writes |
+| `src/clios/capture.py` | the four quick-add targets and the heading insert |
+| `src/clios/buffer/` | links and folders |
+
+### Adding a command
+
+Write a function with a docstring whose first line is its one line help, then
+add one line to `user_input_map.py`:
+
+```python
+"weather": {"leaf node": actions.weather},
+```
+
+The docstring summary shows up in `py-cli` and in `py-cli <verb> --help`, and
+the signature is printed when the arguments are wrong. Nested paths work too:
+a dict of dicts gives `py-cli search scholar <query>`.
+
+Platform handling is one place rather than two shims: `webbrowser.open` for
+URLs, and `os.startfile` / `open -R` / `xdg-open` for paths.

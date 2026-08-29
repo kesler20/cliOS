@@ -1,0 +1,17 @@
+[project]
+name = "clios"
+version = "0.1.0"
+description = "cliOS in Python: links, folders, site search and Obsidian quick add"
+readme = "README.md"
+authors = [
+    { name = "Kesler", email = "uchekesla@gmail.com" }
+]
+requires-python = ">=3.14"
+dependencies = []
+
+[project.scripts]
+py-cli = "clios:main"
+
+[build-system]
+requires = ["uv_build>=0.9.17,<0.10.0"]
+build-backend = "uv_build"

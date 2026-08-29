@@ -1,6 +1,6 @@
 # ⚙️ command line Operating Systems (cliOS)
 
->`cliOS` is a command line interface for managing links, folders, projects, and searches.
+>`cliOS` is a command line interface for one-shotting commands to open links, folders and capture ideas
 
 `run <command>`, typed at your normal prompt. Same on Windows and macOS.
 

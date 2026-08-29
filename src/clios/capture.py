@@ -5,6 +5,12 @@ import typing
 
 from clios.actions import CliOSError, expand_roots
 
+# ==================== #
+#                      #
+#   UI ICONS           #
+#                      #
+# ==================== #
+
 CAPTURED = "✅"
 INTO = "↳"
 

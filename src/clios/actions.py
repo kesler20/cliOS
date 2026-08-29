@@ -8,6 +8,13 @@ import typing
 
 from clios import ERROR, HINT, print_error
 
+
+# ==================== #
+#                      #
+#   UI ICONS           #
+#                      #
+# ==================== # 
+
 LINK = "🔗"
 FOLDER = "📂"
 SEARCH = "🔍"

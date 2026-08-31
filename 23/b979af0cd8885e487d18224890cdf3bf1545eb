@@ -1,0 +1,14 @@
+README.md
+  h_dfc1c29978048b 7-53,56-139
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "23b979af0cd8885e487d18224890cdf3bf1545eb",
+  "prompts": {},
+  "humans": {
+    "h_dfc1c29978048b": {
+      "author": "Kesler Isoko <kesler.isoko@gousto.co.uk>"
+    }
+  }
+}

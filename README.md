@@ -4,10 +4,139 @@
 
 `run <command>`, typed at your normal prompt. Same on Windows and macOS.
 
-## Install
+## Installation
+
+### macOS
+
+cliOS requires Python 3.14 or newer. Install it as an isolated command-line tool
+with `pipx` instead of adding it to Homebrew's global Python environment. The
+editable installation exposes `run` everywhere while continuing to execute the
+source in the cloned repository.
+
+#### Prerequisites
+
+Confirm that Homebrew and `pipx` are available.
 
 ```bash
-uv tool install --editable .
+brew --version
+pipx --version
+```
+
+Install the required Python version through Homebrew.
+
+```bash
+brew install python@3.14
+"$(brew --prefix python@3.14)/bin/python3.14" --version
+```
+
+#### Clone and install
+
+Clone cliOS into `~/protocol` if it is not already present.
+
+```bash
+mkdir -p "$HOME/protocol"
+git clone https://github.com/kesler20/cliOS.git "$HOME/protocol/cliOS"
+```
+
+The name `clios` is also used by an unrelated package on PyPI. Remove any
+existing `pipx` installation with that package name before installing this
+repository.
+
+```bash
+pipx uninstall clios
+pipx install \
+  --python "$(brew --prefix python@3.14)/bin/python3.14" \
+  --editable "$HOME/protocol/cliOS"
+```
+
+Make sure the directory where `pipx` exposes commands is on `PATH`, then restart
+the login shell.
+
+```bash
+pipx ensurepath
+exec zsh -l
+```
+
+#### Verify the installation
+
+Run cliOS from a directory outside its repository.
+
+```bash
+cd /tmp
+command -v run
+run
+```
+
+`command -v run` should resolve to `~/.local/bin/run`. The final command should
+print the cliOS command list.
+
+#### Update or remove cliOS
+
+Because the installation is editable, source changes take effect immediately.
+Pull repository updates normally. Reinstall only when dependencies, entry points,
+or package metadata change.
+
+```bash
+git -C "$HOME/protocol/cliOS" pull
+pipx reinstall clios
+```
+
+Remove the global command without deleting the repository.
+
+```bash
+pipx uninstall clios
+```
+
+### Windows
+
+cliOS uses the same editable tool installation on Windows, managed by `uv`.
+Install Python 3.14 and confirm that `uv` can find it.
+
+```powershell
+uv python install 3.14
+uv python find 3.14
+```
+
+Clone cliOS into the `protocol` folder if it is not already present.
+
+```powershell
+New-Item -ItemType Directory -Force -Path "$HOME\protocol" | Out-Null
+git clone https://github.com/kesler20/cliOS.git "$HOME\protocol\cliOS"
+Set-Location "$HOME\protocol\cliOS"
+```
+
+Install the repository as an editable global tool. This retains the original
+Windows installation command.
+
+```powershell
+uv tool install --python 3.14 --editable .
+uv tool update-shell
+```
+
+Open a new PowerShell window after `uv tool update-shell`, then verify the command
+from another directory.
+
+```powershell
+Set-Location $HOME
+Get-Command run
+run
+```
+
+If an unrelated package named `clios` is already installed through `uv`, replace
+it with this repository.
+
+```powershell
+uv tool uninstall clios
+Set-Location "$HOME\protocol\cliOS"
+uv tool install --python 3.14 --editable .
+```
+
+Source changes take effect immediately. Reinstall after dependency, entry-point,
+or package metadata changes.
+
+```powershell
+git -C "$HOME\protocol\cliOS" pull
+uv tool install --force --python 3.14 --editable "$HOME\protocol\cliOS"
 ```
 
 ## Quick add

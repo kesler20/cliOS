@@ -107,12 +107,12 @@ def git_state() -> str:
 
     marks = []
     if ahead:
-        marks.append(f"↑{ahead}")
+        marks.append(f"⬆️ {ahead} ahead")
     if behind:
-        marks.append(f"↓{behind}")
+        marks.append(f"⬇️ {behind} behind")
     if dirty:
-        marks.append(f"●{dirty}")
-    return " ".join(marks) if marks else "clean"
+        marks.append(f"🟠 {dirty} dirty")
+    return " | ".join(marks) if marks else f"{CLEANED} clean"
 
 
 def display_ui() -> str:

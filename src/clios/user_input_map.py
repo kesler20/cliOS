@@ -1,5 +1,5 @@
 import typing
-from clios import actions, capture
+from clios import actions, capture, interactive
 
 mapper: typing.Dict[str, typing.Any] = {
   # quick add capture commands. 
@@ -9,6 +9,7 @@ mapper: typing.Dict[str, typing.Any] = {
     "study": {"leaf node": capture.study},
 
     # special commands.
+    "cli": {"leaf node": interactive.main},
     "code": {"leaf node": actions.open_in_code},
     "clone": {"leaf node": actions.clone},
     "github": {"leaf node": actions.github},
@@ -21,8 +22,10 @@ mapper: typing.Dict[str, typing.Any] = {
     "link": {"leaf node": actions.open_link},
     "links": {"leaf node": actions.open_link},
     "cleanup": {"leaf node": actions.cleanup},
+    "copy": {"leaf node": actions.copy_value},
     "rm": {"leaf node": actions.remove_key},
     "set": {"leaf node": actions.set_key},
+    "update": {"leaf node": actions.update},
 
     # search commands.
     "search": {

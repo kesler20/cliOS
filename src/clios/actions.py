@@ -6,24 +6,21 @@ import subprocess
 import sys
 import typing
 
-from clios import ERROR, HINT, print_error
-
-
-# ==================== #
-#                      #
-#   UI ICONS           #
-#                      #
-# ==================== # 
-
-LINK = "🔗"
-FOLDER = "📂"
-FILE = "📄"
-SEARCH = "🔍"
-GITHUB = "🐙"
-CODE = "💻"
-ADDED = "✨"
-REMOVED = "🗑️"
-CLEANED = "🧹"
+from clios import print_error
+from clios.ui import (
+    ADDED,
+    CLEANED,
+    CODE,
+    COPIED,
+    ERROR,
+    FILE,
+    FOLDER,
+    GITHUB,
+    HINT,
+    LINK,
+    REMOVED,
+    SEARCH,
+)
 
 BUFFER_FOLDER = pathlib.Path(__file__).parent / "buffer"
 HOME = pathlib.Path.home()
@@ -202,8 +199,12 @@ def open_path(target: str) -> None:
 # ================= #
 
 
-def log_invocation(status: int) -> None:
-    """Append to the log the shell frontends share, so all three rank together."""
+def log_invocation(status: int, command: str = "") -> None:
+    """Append to the log the shell frontends share, so all three rank together.
+
+    `command` is given by the interactive environment, where the typed line is
+    not in `sys.argv`. It defaults to the one shot invocation.
+    """
     try:
         LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
         stamp = datetime.datetime.now().astimezone().strftime("%Y-%m-%dT%H:%M:%S%z")
@@ -213,7 +214,7 @@ def log_invocation(status: int) -> None:
             import socket
 
             machine = socket.gethostname()
-        command = "run " + " ".join(sys.argv[1:])
+        command = command or "run " + " ".join(sys.argv[1:])
         line = "\t".join([stamp, machine, str(status), command])
         with open(LOG_PATH, "a", encoding="utf-8", newline="") as log_file:
             log_file.write(line + "\n")
@@ -473,3 +474,77 @@ def remove_key(table: str = "", key: str = "", *rest: str) -> None:
     del values[key]
     write_buffer(table, values)
     print(f"{REMOVED} removed {table} {key}")
+
+
+def copy_value(table: str = "", *parts: str) -> None:
+    """Copy a stored link, folder or file value to the clipboard.
+
+    A `run` process cannot change the directory of the shell that launched it,
+    so a folder key is copied for you to paste after `cd`.
+
+    Example
+    ```txt
+    run copy folder papers
+    ```
+    """
+    if not table or table.startswith("--"):
+        raise CliOSError("usage: run copy link|folder|file <key>")
+    table = resolve_table(table)
+    key = "-".join(word for word in parts if not word.startswith("--"))
+    if not key:
+        list_keys(table, f"copy {table}")
+        raise CliOSError("")
+
+    values = read_buffer(table)
+    if key not in values:
+        print_error(f"{ERROR} no such {table[:-1]} '{key}'")
+        list_keys(table, f"copy {table}", near=key)
+        raise CliOSError("")
+
+    value = values[key]
+    if table == "folders":
+        value = expand_roots(value)
+    elif table == "files":
+        value = str(HOME / expand_roots(value))
+
+    copy_to_clipboard(value)
+    print(f"{COPIED} {value}")
+
+
+def copy_to_clipboard(value: str) -> None:
+    """Put text on the clipboard using whatever the platform ships with."""
+    platform = platform_name()
+    if platform == "windows":
+        command = ["clip"]
+    elif platform == "darwin":
+        command = ["pbcopy"]
+    else:
+        command = ["xclip", "-selection", "clipboard"]
+    try:
+        subprocess.run(command, input=value, text=True, check=True)
+    except (OSError, subprocess.CalledProcessError) as error:
+        raise CliOSError(f"could not reach the clipboard: {error}") from error
+
+
+def update() -> None:
+    """Fetch cliOS's own repository and report what the prompt will show.
+
+    Read only: it never pulls, merges or touches the working tree.
+
+    Example
+    ```txt
+    run update
+    ```
+    """
+    from clios import ui
+
+    result = subprocess.run(
+        ["git", "fetch"],
+        cwd=ui.REPOSITORY,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        raise CliOSError(f"could not fetch: {result.stderr.strip()}")
+    print(f"{GITHUB} cliOS {ui.git_state()}")

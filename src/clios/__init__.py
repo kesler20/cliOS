@@ -2,15 +2,7 @@ import inspect
 import sys
 import typing
 
-# ==================== #
-#                      #
-#   UI ICONS           #
-#                      #
-# ==================== #
-
-LOGO = "⚙️"
-ERROR = "❌"
-HINT = "💡"
+from clios.ui import ERROR, HINT, LOGO  # noqa: F401  re-exported for commands
 
 
 def print_message(*args):

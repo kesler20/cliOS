@@ -39,8 +39,12 @@ run folder papers                    open a stored folder in the file explorer
 run file links                       open a stored file in its default app
 run set link foo https://foo.com     add a key
 run rm link foo                      remove a key
+run copy folder papers               put a stored value on the clipboard
 run cleanup                          re-sort the buffer files alphabetically
 ```
+
+`copy` exists because a `run` process cannot change the directory of the shell
+that launched it. Copy the folder path, then paste it after `cd`.
 
 Keys are composite, so `link` and `file` join their words: `youtube watch later`
 and `youtube-watch-later` are the same thing. On a miss you get the keys sharing
@@ -56,6 +60,32 @@ themselves, so `run file links` opens the link list for editing.
 run search how to exit vim           google
 run search scholar mrna vaccine      also yt, gh, images, icons, maps, amazon
 ```
+
+## The interactive environment
+
+```
+run cli                              open it
+run update                           fetch cliOS and refresh the prompt's git state
+```
+
+The prompt is `{cwd} | {git state} | cliOS`, where the git state describes cliOS's
+own repository: `↑` ahead, `↓` behind, `●` uncommitted. Nothing fetches on its
+own, so `↓` only moves once `run update` has fetched. `update` never pulls or
+touches the working tree.
+
+Inside, every verb above works as it does outside, and `run` gains a second
+meaning: it reaches the native shell, with your profile loaded, so aliases and
+functions are there.
+
+```
+run cd papers                        move, resolving a folder key before a path
+run cd ..                            and ordinary paths, plus home
+run git log --oneline -5             anything else goes to the shell
+exit                                 or quit, Ctrl-D, Ctrl-C
+```
+
+`cd` is the one command not passed through, since a directory change inside a
+spawned shell would die with it. Commands typed here are logged like any other.
 
 ## Everything else
 

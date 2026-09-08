@@ -1,0 +1,14 @@
+src/clios/buffer/links.json
+  h_dfc1c29978048b 16,37,79
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "e9d140dc0e8bb8988834fc9ac6cb9fa45b461861",
+  "prompts": {},
+  "humans": {
+    "h_dfc1c29978048b": {
+      "author": "Kesler Isoko <kesler.isoko@gousto.co.uk>"
+    }
+  }
+}

@@ -5,6 +5,7 @@ mapper: typing.Dict[str, typing.Any] = {
   # quick add capture commands. 
     "agenda": {"leaf node": capture.agenda},
     "bi": {"leaf node": capture.brain_inbox},
+    "ai": {"leaf node": capture.agent_idea},
     "sop": {"leaf node": capture.sop},
     "study": {"leaf node": capture.study},
 

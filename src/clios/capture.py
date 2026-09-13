@@ -28,6 +28,14 @@ TARGETS: typing.Dict[str, typing.Dict[str, typing.Any]] = {
         "task": True,
         "template": "${VAULT}/3 Resources/Templates/Daily Notes Template.md",
     },
+    "ai": {
+        "file": "${VAULT}/2 Activities/Daily Notes/{date}.md",
+        "after": "# Brain Inbox",
+        "at": "start",
+        "task": True,
+        "template": "${VAULT}/3 Resources/Templates/Daily Notes Template.md",
+        "prefix": "[AGENT] ",
+    },
     "sop": {
         "file": "${VAULT}/2 Activities/Daily Notes/{date}.md",
         "after": "# SOPs",
@@ -103,7 +111,7 @@ def capture(target_id: str, *words: str) -> None:
     path = pathlib.Path(
         expand_roots(target["file"].replace("{date}", now.strftime("%Y-%m-%d")))
     )
-    line = f"{now.strftime('%H:%M')} {text}"
+    line = f"{now.strftime('%H:%M')} {target.get('prefix', '')}{text}"
     if target.get("task"):
         line = f"- [ ] {line}"
 
@@ -132,6 +140,18 @@ def brain_inbox(*words: str) -> None:
     ```
     """
     capture("bi", *words)
+
+
+def agent_idea(*words: str) -> None:
+    """Capture a thought into today's brain inbox, tagged for the FDE's own
+    agent inbox rather than the whole brain inbox.
+
+    Example
+    ```txt
+    run ai clean up the loops.json drift check
+    ```
+    """
+    capture("ai", *words)
 
 
 def sop(*words: str) -> None:

@@ -165,6 +165,8 @@ run github wiz_iot_hub               open it on GitHub
 ```
 run link youtube watch later         open a stored link
 run folder papers                    open a stored folder in the file explorer
+run folder phd-projects              open the PhD PKM projects folder
+run folder gousto-shared-drives      open the Gousto Shared drives folder on macOS
 run file links                       open a stored file in its default app
 run set link foo https://foo.com     add a key
 run rm link foo                      remove a key
@@ -178,6 +180,12 @@ that launched it. Copy the folder path, then paste it after `cd`.
 Keys are composite, so `link` and `file` join their words: `youtube watch later`
 and `youtube-watch-later` are the same thing. On a miss you get the keys sharing
 a word with what you typed.
+
+The PhD PKM has `phd-projects`, `phd-activities`, `phd-resources` and
+`phd-archive` keys. On the Gousto Mac, `gousto-drive`, `gousto-projects`,
+`gousto-activities`, `gousto-resources`, `gousto-archive` and
+`gousto-shared-drives` resolve through Google Drive for desktop. Machine-specific
+keys report clearly when their root is unavailable.
 
 `file` values are paths relative to your home directory, resolved at run time so
 the same key works on both machines. It comes seeded with the three buffer files

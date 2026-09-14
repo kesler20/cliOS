@@ -34,6 +34,12 @@ ROOTS: typing.Dict[str, typing.Dict[str, str]] = {
     "ONEDRIVE": {"windows": "${HOME}/OneDrive/00 PKM"},
     "ONEDRIVE_HOME": {"windows": "${HOME}/OneDrive"},
     "PHD_ONEDRIVE": {"windows": "${HOME}/OneDrive - University College London/00 PKM"},
+    "GOUSTO_DRIVE": {
+        "darwin": "${HOME}/Library/CloudStorage/GoogleDrive-kesler.isoko@gousto.co.uk/My Drive"
+    },
+    "GOUSTO_SHARED_DRIVES": {
+        "darwin": "${HOME}/Library/CloudStorage/GoogleDrive-kesler.isoko@gousto.co.uk/Shared drives"
+    },
     "PROTOCOL": {"default": "${HOME}/protocol"},
     "VAULT": {"default": "${HOME}/protocol/00 PKM"},
 }

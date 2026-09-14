@@ -50,7 +50,7 @@ def change_directory(*words: str) -> int:
     directory of the same name that happens to be here.
     """
     if not words:
-        raise CliOSError("usage: run cd <folder key|path>")
+        raise CliOSError("usage: cmd cd <folder key|path>")
 
     key = "-".join(words)
     folders = read_buffer("folders")
@@ -69,16 +69,16 @@ def change_directory(*words: str) -> int:
 
 
 def run_verb(*words: str) -> int:
-    """`run` inside the environment: reach the shell, or move with `cd`."""
+    """`cmd` inside the environment: reach the shell, or move with `cd`."""
     if not words:
-        raise CliOSError("usage: run <command>")
+        raise CliOSError("usage: cmd <command>")
     if words[0] == "cd":
         return change_directory(*words[1:])
     return shell_command(" ".join(words))
 
 
 def execute_line(tokens: typing.List[str]) -> int:
-    if tokens[0] == "run":
+    if tokens[0] == "cmd":
         try:
             return run_verb(*tokens[1:])
         except CliOSError as error:
@@ -98,7 +98,7 @@ def main() -> None:
     """
     sys.stdout.write(TITLE)
     print_line()
-    print_message("type a command, `run <shell command>` to reach the shell, or exit")
+    print_message("type a command, `cmd <shell command>` to reach the shell, or exit")
     print_line()
 
     while True:
